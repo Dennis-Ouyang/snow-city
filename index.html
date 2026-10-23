@@ -307,9 +307,20 @@ button.go.big { font-size: 26px; padding: 14px 0 11px; width: 78%; box-shadow: 0
 .home-nav .ico { width: 30px; height: 30px; border-radius: 50%; background: #fff; color: #1d3a52; font-style: normal; font-size: 17px; font-weight: 800; display: grid; place-items: center; }
 .home-nav .coin-ico { background: radial-gradient(circle at 38% 35%, #fff3a6, #f5c431 55%, #d99a12); }
 .home-nav em { position: absolute; top: 4px; right: 14px; width: 10px; height: 10px; border-radius: 50%; background: #ff4a3d; border: 2px solid #fff; }
-.sheet-wrap { align-items: end; place-items: end center; padding-bottom: 0; }
-.sheet { width: 100%; max-width: 420px; box-sizing: border-box; max-height: 80vh; overflow-y: auto; background: var(--glass); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-  border-radius: 22px 22px 0 0; padding: 14px 18px calc(env(safe-area-inset-bottom, 0px) + 20px); display: flex; flex-direction: column; gap: 10px; animation: up .25s ease-out; }
+.sheet-wrap { place-items: center; animation: fadeIn .22s ease-out; }
+.sheet-wrap.closing { animation: fadeOut .18s ease-in forwards; }
+.sheet-wrap.closing .sheet, .panel.closing > .card { animation: popOut .18s ease-in forwards; }
+.panel.closing { animation: fadeOut .18s ease-in forwards; }
+@keyframes fadeIn { from { opacity: 0; } }
+@keyframes fadeOut { to { opacity: 0; } }
+@keyframes popIn { from { opacity: 0; transform: translateY(14px) scale(.92); } }
+@keyframes popOut { to { opacity: 0; transform: translateY(10px) scale(.94); } }
+.panel:not(.home) > .card { animation: popIn .28s cubic-bezier(.2, .9, .3, 1.15); }
+#welcome { animation: fadeIn .25s ease-out; }
+.welcome { gap: 10px; }
+.welcome .acct-form { width: 100%; }
+.sheet { width: 100%; max-width: 420px; box-sizing: border-box; max-height: 84vh; overflow-y: auto; background: var(--glass); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border-radius: 22px; padding: 14px 18px 18px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 18px 40px rgba(29, 42, 51, .28); animation: popIn .28s cubic-bezier(.2, .9, .3, 1.15); }
 @keyframes up { from { transform: translateY(40px); opacity: 0; } }
 .sheet-head { display: flex; justify-content: space-between; align-items: center; font-size: 20px; }
 .sheet-head .x { font-family: inherit; font-size: 24px; line-height: 1; width: 34px; height: 34px; border-radius: 50%; border: 0; background: #fff; color: var(--ink); cursor: pointer; }
@@ -578,6 +589,22 @@ body.hand-left .speedo { left: auto; right: max(16px, env(safe-area-inset-right,
         <div><span>金币</span><b>捡到的金币，加每 100 米 1 枚</b></div>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="panel" id="welcome" hidden>
+  <div class="card welcome">
+    <p class="eyebrow">欢迎来到</p>
+    <h2>雪城速降</h2>
+    <p>注册一个账号，换手机、电脑都能接着玩，成绩还能上全球排行榜。</p>
+    <form class="acct-form" id="wForm">
+      <input id="wUser" maxlength="12" placeholder="用户名，最多 12 个字" autocomplete="username">
+      <input id="wPass" type="password" placeholder="密码，至少 6 位" autocomplete="current-password">
+      <div class="acct-btns"><button class="ghost" type="submit" data-act="login">登录</button><button class="go" type="submit" data-act="signup">注册新账号</button></div>
+      <p class="acct-err" id="wErr" role="status"></p>
+    </form>
+    <button type="button" class="linkbtn" id="wSkip">先当游客玩</button>
+    <p class="sheet-note">不用手机号和邮箱，忘了密码没法找回。以后也能在设置里登录。</p>
   </div>
 </div>
 
@@ -6223,6 +6250,10 @@ $('shopBack').addEventListener('click', () => { refreshWallets(); showPanel(shop
 $('menuShop').addEventListener('click', () => openShop(ui.menu));
 // ---------- settings and the change log ----------
 const CHANGELOG = [
+  ['v18', '10月23日', [
+    '首页的任务、排行、玩法、设置、每日奖励改成屏幕中间弹出的窗口，打开和关闭都有动画',
+    '新设备第一次打开时会提示登录或注册，也可以先当游客玩',
+  ]],
   ['v17', '10月23日', [
     '可选账号：设置里用用户名和密码注册登录，不用手机号和邮箱',
     '登录后金币、皮肤、升级、成就和纪录自动同步到云端，手机和电脑是同一个人',
@@ -6335,7 +6366,7 @@ $('dailyClaim').addEventListener('click', () => {
   const st = dailyState(); if (!st.can) return;
   save.wallet += DAILY[st.day - 1]; if (st.day === 7) save.items.revive++;
   save.daily = { last: today(), streak: st.day }; persist(); refreshWallets(); sfx.power && initAudio(); renderDaily();
-  toast(`+${DAILY[st.day - 1]} 金币`, 'boost'); setTimeout(() => { $('sheet').hidden = true; }, 700);
+  toast(`+${DAILY[st.day - 1]} 金币`, 'boost'); setTimeout(closeSheet, 700);
 });
 function openSheet(which) {
   $('sheetTitle').textContent = { help: '玩法', set: '设置', missions: '任务与成就', daily: '每日奖励', board: '排行榜' }[which];
@@ -6345,15 +6376,22 @@ function openSheet(which) {
   if (which === 'daily') renderDaily();
   if (which === 'set') { SETTINGS.seen = CHANGELOG[0][0]; saveSettings(); $('setDot').hidden = true; }
   if (which === 'help') { try { localStorage.setItem('snowcity-help', '1'); } catch (e) {} $('helpDot').hidden = true; }
-  $('sheet').hidden = false; $('sheetClose').focus();
+  $('sheet').classList.remove('closing'); $('sheet').hidden = false; $('sheetClose').focus();
 }
 $('navMissions').addEventListener('click', () => openSheet('missions'));
 $('navHelp').addEventListener('click', () => openSheet('help'));
 $('navSet').addEventListener('click', () => openSheet('set'));
 $('dailyBtn').addEventListener('click', () => openSheet('daily'));
 try { $('helpDot').hidden = !!localStorage.getItem('snowcity-help'); } catch (e) { $('helpDot').hidden = false; }
-$('sheetClose').addEventListener('click', () => { $('sheet').hidden = true; });
-$('sheet').addEventListener('click', e => { if (e.target.id === 'sheet') $('sheet').hidden = true; });
+// dialogs fade and shrink away instead of vanishing
+function closePanel(el, done) {
+  if (el.hidden || el.classList.contains('closing')) return;
+  el.classList.add('closing');
+  setTimeout(() => { el.hidden = true; el.classList.remove('closing'); if (done) done(); }, reduceMotion ? 0 : 180);
+}
+const closeSheet = () => closePanel($('sheet'));
+$('sheetClose').addEventListener('click', closeSheet);
+$('sheet').addEventListener('click', e => { if (e.target.id === 'sheet') closeSheet(); });
 // back to the home screen after a run: missions met in that run are swapped for new ones
 $('homeBtn').addEventListener('click', () => {
   retireMissions(); resetWorld();
@@ -6395,7 +6433,7 @@ addEventListener('keydown', e => {
   if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.r = true;
   if (S.state === 'play' && !e.repeat && (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === ' ')) { e.preventDefault(); requestFlip(); }
   if (S.state === 'play' && !e.repeat && (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S')) { e.preventDefault(); requestSpin(); }
-  if ((e.key === ' ' || e.key === 'Enter') && S.state !== 'play' && S.state !== 'crash' && document.activeElement?.tagName !== 'BUTTON' && document.activeElement?.tagName !== 'INPUT') {
+  if ((e.key === ' ' || e.key === 'Enter') && S.state !== 'play' && S.state !== 'crash' && document.activeElement?.tagName !== 'BUTTON' && document.activeElement?.tagName !== 'INPUT' && $('welcome').hidden) {
     e.preventDefault();
     if (!ui.menu.hidden) start(); else if (!ui.over.hidden) $('retryBtn').click();
   }
@@ -7711,6 +7749,28 @@ $('acctForm').addEventListener('submit', async e => {
 });
 $('oLogin').addEventListener('click', () => { openSheet('set'); $('acctForm').hidden = false; $('acctUser').focus(); });
 renderAcct();
+// first visit on a device that is not signed in: offer an account once, guests can skip
+const WELCOME_KEY = 'snowcity-welcome';
+function closeWelcome() { try { localStorage.setItem(WELCOME_KEY, '1'); } catch (e) {} closePanel($('welcome')); }
+function maybeWelcome() {
+  if (!onlineOn() || auth || ui.menu.hidden || !$('sheet').hidden || S.state === 'play') return;
+  try { if (localStorage.getItem(WELCOME_KEY)) return; } catch (e) { return; }
+  $('welcome').hidden = false; $('wSkip').focus({ preventScroll: true });
+}
+$('wSkip').addEventListener('click', closeWelcome);
+$('wForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const act = (e.submitter && e.submitter.dataset.act) || 'login';
+  const btns = $('wForm').querySelectorAll('button');
+  btns.forEach(b => b.disabled = true); $('wErr').textContent = act === 'signup' ? '正在注册…' : '正在登录…';
+  try {
+    await doAuth(act, $('wUser').value, $('wPass').value);
+    $('wPass').value = ''; $('wErr').textContent = '';
+    closeWelcome(); toast(act === 'signup' ? '注册成功' : '欢迎回来', 'boost');
+  } catch (err) { $('wErr').textContent = err.message; }
+  btns.forEach(b => b.disabled = false); renderAcct();
+});
+setTimeout(maybeWelcome, 1200);
 // anything left over from last time goes up a few seconds after the game loads, after the cloud copy is pulled
 setTimeout(() => { syncCloud().catch(() => {}).then(() => flushUploads()).catch(() => {}); }, 2500);
 
