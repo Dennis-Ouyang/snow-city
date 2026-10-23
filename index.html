@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>雪城速降</title>
+<meta name="claude:viewport-fit-sides" content="cover">
 <style>
 @font-face{font-family:"Baloo 2";font-weight:600;font-display:swap;src:url(fonts/baloo-2-latin-600-normal.woff2) format("woff2")}
 @font-face{font-family:"Baloo 2";font-weight:800;font-display:swap;src:url(fonts/baloo-2-latin-800-normal.woff2) format("woff2")}
@@ -317,8 +318,18 @@ button:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 .home-top { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px 3px 6px; border-radius: 999px; background: rgba(20,32,44,.45); color: #fff; font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .best-pill { padding-left: 12px; font-size: 13px; }
-.top-l { display: flex; gap: 8px; align-items: center; }
+.top-l { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; min-width: 0; }
+.best-pill { flex: none; }
 .pill.gift { position: relative; border: 0; font-family: inherit; font-size: 13px; padding: 6px 12px 4px; cursor: pointer; background: rgba(240, 120, 40, .85); }
+.pill.sync { border: 0; font-family: inherit; font-size: 12px; padding: 6px 11px 4px; cursor: pointer; }
+.pill.sync::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #c9d1d9; }
+.pill.sync[data-tone="ok"]::before { background: #4cd38a; }
+.pill.sync[data-tone="warn"]::before { background: #ffb02e; }
+.acct-tools { display: flex; gap: 14px; flex-wrap: wrap; }
+.acct-tools:not(:has(button:not([hidden]))) { display: none; }
+.setrow small { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-top: 2px; }
+.setrow button.ghost.sm { font-size: 13px; padding: 6px 12px 4px; box-shadow: 0 3px 0 #c3d0d8; background: #eef3f6; }
+#setQ button { padding: 5px 8px 3px; }
 .pill.gift em { position: absolute; top: -3px; right: -3px; width: 10px; height: 10px; border-radius: 50%; background: #ff3b30; border: 2px solid #fff; }
 .best-pill:empty { visibility: hidden; }
 .logo { text-align: center; color: #fff; margin-top: -18vh; }
@@ -542,7 +553,7 @@ body.hand-left .speedo { left: auto; right: max(16px, env(safe-area-inset-right,
 
 <div class="panel home" id="menu">
   <div class="home-top">
-    <div class="top-l"><div class="pill"><span class="coin sm"></span><span id="menuWallet">0</span></div><button class="pill gift" id="dailyBtn" type="button">每日奖励<em id="dailyDot" hidden></em></button></div>
+    <div class="top-l"><div class="pill"><span class="coin sm"></span><span id="menuWallet">0</span></div><button class="pill gift" id="dailyBtn" type="button">每日奖励<em id="dailyDot" hidden></em></button><button class="pill sync" id="syncPill" type="button" hidden></button></div>
     <div class="pill best-pill" id="bestLine"></div>
   </div>
   <div class="logo">
@@ -590,7 +601,8 @@ body.hand-left .speedo { left: auto; right: max(16px, env(safe-area-inset-right,
     </div>
     <div id="sheetSet" hidden>
       <div class="acct" id="acct" hidden>
-        <div class="acct-row"><div><b id="acctName">游客</b><span id="acctNote"></span></div><button type="button" class="buy" id="acctBtn">登录 / 注册</button></div>
+        <div class="acct-row"><div><b id="acctName">游客</b><span id="acctNote" role="status"></span></div><button type="button" class="buy" id="acctBtn">登录 / 注册</button></div>
+        <div class="acct-tools"><button type="button" class="linkbtn" id="syncNow" hidden>立即同步</button><button type="button" class="linkbtn" id="acctGuest" hidden>把这台设备的游客进度并入账号</button></div>
         <form class="acct-form" id="acctForm" hidden>
           <input id="acctUser" maxlength="12" placeholder="用户名，最多 12 个字" autocomplete="username">
           <input id="acctPass" type="password" placeholder="密码，至少 6 位" autocomplete="current-password">
@@ -605,7 +617,9 @@ body.hand-left .speedo { left: auto; right: max(16px, env(safe-area-inset-right,
         <label class="setrow"><span>震动反馈</span><input type="checkbox" id="setBuzz"><i></i></label>
         <label class="setrow"><span>最佳成绩幽灵</span><input type="checkbox" id="setGhost"><i></i></label>
         <div class="setrow seg"><span>单手按钮</span><div class="segbtns" id="setHand"><button type="button" data-h="off">关</button><button type="button" data-h="left">左手</button><button type="button" data-h="right">右手</button></div></div>
+        <div class="setrow seg"><span>画质</span><div class="segbtns" id="setQ"><button type="button" data-q="auto">自动</button><button type="button" data-q="low">流畅</button><button type="button" data-q="mid">均衡</button><button type="button" data-q="high">精致</button></div></div>
         <label class="setrow"><span>显示帧率</span><input type="checkbox" id="setFps"><i></i></label>
+        <div class="setrow"><span>存档备份<small id="bakNote"></small></span><button type="button" class="ghost sm" id="bakBtn">恢复</button></div>
         <button type="button" class="setrow" id="setTut"><span>新手教程</span><b>再玩一次 ›</b></button>
       </div>
       <h3 class="log-h">更新日志</h3>
@@ -646,6 +660,16 @@ body.hand-left .speedo { left: auto; right: max(16px, env(safe-area-inset-right,
     </form>
     <button type="button" class="linkbtn" id="wSkip">先当游客玩</button>
     <p class="sheet-note">不用手机号和邮箱，忘了密码没法找回。以后也能在设置里登录。</p>
+  </div>
+</div>
+
+<div class="panel" id="migrate" hidden>
+  <div class="card welcome">
+    <p class="eyebrow">游客进度</p>
+    <h2>并入账号「<span id="migName"></span>」？</h2>
+    <p id="migNote"></p>
+    <p class="sheet-note">金币、道具和累计数据会加进账号，纪录、外观和成就取两边最好的。并入后这台设备的游客进度从头开始，不会再被并进别的账号。</p>
+    <div class="acct-btns"><button class="ghost" type="button" id="migNo">先不要</button><button class="go" type="button" id="migYes">并入账号</button></div>
   </div>
 </div>
 
@@ -719,6 +743,13 @@ body.hand-left .speedo { left: auto; right: max(16px, env(safe-area-inset-right,
 <script>
 (() => {
 'use strict';
+// The whole game is this one file (so it publishes as a single page). Read top to bottom it goes:
+//   constants and shop tables · module: Store (the save, its ledger, checksums and backups) · renderer, textures,
+//   materials and shared geometry · the world (paths, forks, ground, PIECES, DECOR, ROUTES, chunks) · rider, trail,
+//   sound · game flow (start, crash, shop, settings, daily reward) · input · missions, achievements, ghost ·
+//   avalanche and boss · update() · picture quality · tutorial · pause and the frame loop · leaderboard ·
+//   module: Cloud (sync with the server) · module: Profile (accounts and the guest) · share card
+// Search for "---------- module:" to jump between the self-contained parts.
 const CH = 50, BH = 7.2, GRAV = 22, TAU = Math.PI * 2, CU = 130, CW = 84, PREV = 150;
 const rnd = (a, b) => a + Math.random() * (b - a);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -770,34 +801,286 @@ const MODES = {
   ava: { name: '雪崩模式', sub: '撞了只减速', diff: 'hard' },
   daily: { name: '每日挑战', sub: '今天大家同一条路', diff: 'easy' },
 };
-function loadSave() {
-  const d = { v: 2, wallet: 0, upg: { magnet: 0, double: 0, shield: 0, heal: 0, luck: 0 }, items: { dash: 0, shield: 0, magnet: 0, coin2: 0, revive: 0 }, use: {}, owned: ['classic'], skin: 'classic', best: { dist: 0, score: 0 }, bestAva: { dist: 0, score: 0 }, mode: 'normal', missions: [], mlvl: {}, bests: {}, stats: {}, ach: {}, board: {}, dailyRec: null };
-  try {
-    const s = JSON.parse(localStorage.getItem('snowcity-save'));
-    if (s) {
-      const out = Object.assign(d, s, { upg: Object.assign(d.upg, s.upg || {}), items: Object.assign(d.items, s.items || {}), use: s.use || {}, best: Object.assign(d.best, s.best || {}), bestAva: Object.assign(d.bestAva, s.bestAva || {}), missions: s.missions || [], mlvl: s.mlvl || {} });
-      if (!s.v) {
-        // older saves: skins that no longer exist are refunded
-        const refund = { cherry: 300, glacier: 500, forest: 500, midnight: 900 };
-        out.owned = (s.owned || ['classic']).filter(id => { if (refund[id]) { out.wallet += refund[id]; return false; } return true; });
-        if (!out.owned.includes('classic')) out.owned.unshift('classic');
-        out.v = 2;
-      }
-      if (!SKINS.some(k => k.id === out.skin) || !out.owned.includes(out.skin)) out.skin = 'classic';
-      // records used to be kept per mode in two fields; now every mode has its own entry
-      out.bests = Object.assign({ normal: out.best, ava: out.bestAva }, s.bests || {});
-      out.stats = s.stats || {}; out.ach = s.ach || {}; out.board = s.board || {};
-      // players from before the tutorial existed have already learned the ropes
-      if (out.tutDone === undefined) out.tutDone = (out.bests.normal && out.bests.normal.dist > 0) || (out.bests.ava && out.bests.ava.dist > 0) || false;
-      if (!MODES[out.mode]) out.mode = 'normal';
-      return out;
+// ---------- module: Store (the save on this device) ----------
+// Every account has its own copy on this device ('snowcity-save@<account id>'), and so has the guest
+// ('snowcity-save'): signing in or out swaps the whole copy, so one player's progress never leaks into another's.
+// Each write is stored with a checksum, and the last few good copies are kept as backups to fall back on.
+// Coins, items, upgrade levels, mission levels and lifetime totals are also kept as a ledger: how much each device
+// has added and taken away. Two copies of one account merge by taking, device by device, the larger of each count,
+// so coins earned on two phones offline add up, and coins spent on one can't come back from the other's copy.
+// Things that can only happen once (an achievement, a day's reward, a skin, an upgrade level) are noted by key;
+// when two devices both did one offline, the extra one is undone (a reward taken back, a purchase refunded).
+const Store = (() => {
+  const GUEST = 'snowcity-save', DEV_KEY = 'snowcity-dev', BAK_N = 3, BAK_GAP = 30 * 60e3;
+  // kept on this device only, never sent to the cloud copy
+  const LOCAL_ONLY = ['pid', 'upq', 'syncUid', 'syncT', 'syncOk', 'rev', 'claimQ'];
+  const ls = {
+    get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: (k, v) => { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } },
+    del: k => { try { localStorage.removeItem(k); } catch (e) {} },
+  };
+  const fnv = s => { let h = 2166136261; for (let k = 0; k < s.length; k++) h = Math.imul(h ^ s.charCodeAt(k), 16777619); return (h >>> 0).toString(36); };
+  const uuid = () => (crypto.randomUUID && crypto.randomUUID()) || 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : r & 3 | 8).toString(16); });
+  let devId = ls.get(DEV_KEY);
+  if (!devId) { devId = 'd' + uuid().replace(/-/g, '').slice(0, 12); ls.set(DEV_KEY, devId); }
+  const keyOf = uid => uid ? GUEST + '@' + uid : GUEST;
+  const num = (v, lo = 0, hi = 1e12) => { v = Number(v); return Math.min(hi, Math.max(lo, Number.isFinite(v) ? v : 0)); };
+  const obj = v => v && typeof v === 'object' && !Array.isArray(v) ? v : {};
+  const rec = r => ({ dist: num(obj(r).dist), score: num(obj(r).score) });
+  const better = (a, b) => { a = rec(a); b = rec(b); return a.dist > b.dist || (a.dist === b.dist && a.score >= b.score) ? a : b; };
+  function blank() {
+    return { v: 3, wallet: 0, upg: { magnet: 0, double: 0, shield: 0, heal: 0, luck: 0 }, items: { dash: 0, shield: 0, magnet: 0, coin2: 0, revive: 0 }, use: {}, owned: ['classic'], skin: 'classic',
+      best: { dist: 0, score: 0 }, bestAva: { dist: 0, score: 0 }, mode: 'normal', missions: [], mlvl: {}, bests: {}, stats: {}, ach: {}, board: {}, dailyRec: null, tutDone: false, t: 0 };
+  }
+  // repair whatever came in (an old save, a damaged one, the cloud copy) into the shape the game expects
+  function clean(s) {
+    s = obj(s);
+    const d = blank(), o = Object.assign(d, s);
+    o.wallet = num(s.wallet, -1e9);
+    o.upg = {}; for (const u of UPGRADES) o.upg[u.id] = Math.round(num(obj(s.upg)[u.id], 0, UPG_COST.length));
+    o.items = {}; for (const it of ITEMS) o.items[it.id] = Math.round(num(obj(s.items)[it.id], 0, 999));
+    o.use = {}; for (const it of ITEMS) if (obj(s.use)[it.id]) o.use[it.id] = true;
+    o.owned = [...new Set(['classic', ...(Array.isArray(s.owned) ? s.owned : []).filter(id => SKINS.some(k => k.id === id))])];
+    if (!s.v) {
+      // saves from before v2: skins that no longer exist are refunded
+      const refund = { cherry: 300, glacier: 500, forest: 500, midnight: 900 };
+      for (const id of Array.isArray(s.owned) ? s.owned : []) if (refund[id]) o.wallet += refund[id];
     }
-  } catch (e) {}
-  return d;
-}
-const save = loadSave();
-function persist() { save.t = Date.now(); try { localStorage.setItem('snowcity-save', JSON.stringify(save)); } catch (e) {} if (persist.hook) persist.hook(); }
-const dur = { magnet: () => 8 + 3 * save.upg.magnet, double: () => 8 + 3 * save.upg.double, shield: () => 10 + 4 * save.upg.shield, hurt: () => 8 - save.upg.heal };
+    if (!o.owned.includes(o.skin)) o.skin = 'classic';
+    o.best = rec(s.best); o.bestAva = rec(s.bestAva);
+    // records used to be kept per mode in two fields; now every mode has its own entry
+    o.bests = {}; const bs = Object.assign({ normal: o.best, ava: o.bestAva }, obj(s.bests));
+    for (const m in bs) if (MODES[m] && m !== 'daily') o.bests[m] = rec(bs[m]);
+    o.stats = {}; for (const k in obj(s.stats)) { const v = s.stats[k]; if (k === 'scenes') o.stats.scenes = Array.isArray(v) ? [...new Set(v.filter(x => typeof x === 'string'))] : []; else o.stats[k] = num(v); }
+    o.mlvl = {}; for (const k in obj(s.mlvl)) o.mlvl[k] = Math.round(num(s.mlvl[k], 0, 99));
+    o.missions = (Array.isArray(s.missions) ? s.missions : []).filter(x => typeof x === 'string').slice(0, 3);
+    o.ach = {}; for (const k in obj(s.ach)) if (s.ach[k]) o.ach[k] = String(s.ach[k]).slice(0, 12);
+    o.board = {};
+    for (const m in obj(s.board)) if (MODES[m] && Array.isArray(s.board[m])) o.board[m] = s.board[m].filter(r => r && typeof r === 'object').map(r => ({ date: String(r.date || ''), dist: num(r.dist), score: num(r.score), skin: String(r.skin || 'classic'), ...(r.ver ? { ver: r.ver } : {}), ...(r.day ? { day: String(r.day) } : {}) })).slice(0, 10);
+    const dr = s.dailyRec;
+    // the daily record used to be dated 'Y-M-D' unpadded; the challenge day is now 'YYYY-MM-DD'
+    o.dailyRec = dr && typeof dr === 'object' && dr.date ? { date: String(dr.date).replace(/^(\d+)-(\d+)-(\d+)$/, (_, y, m, d) => `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`), dist: num(dr.dist), score: num(dr.score), done: !!dr.done } : null;
+    o.daily = s.daily && typeof s.daily === 'object' ? { last: String(s.daily.last || ''), streak: Math.round(num(s.daily.streak, 0, 7)) } : undefined;
+    if (o.daily === undefined) delete o.daily;
+    if (!MODES[o.mode]) o.mode = 'normal';
+    // players from before the tutorial existed have already learned the ropes
+    if (s.tutDone === undefined) o.tutDone = o.bests.normal && o.bests.normal.dist > 0 || o.bests.ava && o.bests.ava.dist > 0 || false;
+    o.tutDone = !!o.tutDone;
+    o.t = num(s.t);
+    if (typeof o.nick !== 'string') delete o.nick;
+    o.led = cleanLed(s.led);
+    o.v = 3;
+    return o;
+  }
+  // ---- the ledger ----
+  // led = { id, base: { path: n }, dev: { device: { a: { path: added }, s: { path: taken }, u: { key: { path: n } } } } }
+  // a value is base + everything every device added - everything taken + the corrections for things done twice
+  function cleanLed(L) {
+    if (!L || typeof L !== 'object' || !L.id) return null;
+    const out = { id: String(L.id), base: {}, dev: {} };
+    for (const p in obj(L.base)) out.base[p] = num(L.base[p], -1e12);
+    for (const d in obj(L.dev)) {
+      const x = obj(L.dev[d]), y = out.dev[d] = { a: {}, s: {}, u: {} };
+      for (const p in obj(x.a)) y.a[p] = num(x.a[p]);
+      for (const p in obj(x.s)) y.s[p] = num(x.s[p]);
+      for (const k in obj(x.u)) { y.u[k] = {}; for (const p in obj(x.u[k])) y.u[k][p] = num(x.u[k][p], -1e12); }
+    }
+    return out;
+  }
+  const getP = (o, p) => { const i = p.indexOf('.'); return i < 0 ? o[p] : obj(o[p.slice(0, i)])[p.slice(i + 1)]; };
+  const setP = (o, p, v) => { const i = p.indexOf('.'); if (i < 0) o[p] = v; else (o[p.slice(0, i)] || (o[p.slice(0, i)] = {}))[p.slice(i + 1)] = v; };
+  function paths(...os) {
+    const ps = new Set(['wallet', ...ITEMS.map(i => 'items.' + i.id), ...UPGRADES.map(u => 'upg.' + u.id)]);
+    for (const o of os) {
+      if (!o) continue;
+      for (const k in obj(o.stats)) if (k !== 'scenes') ps.add('stats.' + k);
+      for (const k in obj(o.mlvl)) ps.add('mlvl.' + k);
+      if (o.led) { for (const p in o.led.base) ps.add(p); for (const d in o.led.dev) { const x = o.led.dev[d]; for (const p in x.a) ps.add(p); for (const p in x.s) ps.add(p); } }
+    }
+    return ps;
+  }
+  const r6 = v => Math.round(v * 1e6) / 1e6;
+  function values(L) {
+    const v = Object.assign({}, L.base), once = {};
+    for (const d in L.dev) {
+      const x = L.dev[d];
+      for (const p in x.a) v[p] = (v[p] || 0) + x.a[p];
+      for (const p in x.s) v[p] = (v[p] || 0) - x.s[p];
+      for (const k in x.u) (once[k] || (once[k] = [])).push(x.u[k]);
+    }
+    // a one-time thing done on several devices counts once: keep the biggest, undo the rest
+    for (const k in once) {
+      const list = once[k]; if (list.length < 2) continue;
+      const ps = new Set(list.flatMap(o => Object.keys(o)));
+      for (const p of ps) { const xs = list.map(o => o[p] || 0); v[p] = (v[p] || 0) - (xs.reduce((a, b) => a + b, 0) - Math.max(...xs)); }
+    }
+    for (const p in v) v[p] = r6(v[p]);
+    return v;
+  }
+  function startLed(o, id) {
+    const L = { id: id || 'L' + uuid().slice(0, 8), base: {}, dev: {} };
+    for (const p of paths(o)) { const x = Number(getP(o, p)); if (x) L.base[p] = x; }
+    return L;
+  }
+  // whatever changed since the ledger last looked is booked to this device
+  function reconcile(o, dev = devId) {
+    if (!o.led) { o.led = startLed(o); return o; }
+    const v = values(o.led), x = o.led.dev[dev] || (o.led.dev[dev] = { a: {}, s: {}, u: {} });
+    for (const p of paths(o)) {
+      const d = r6(num(getP(o, p), -1e12) - (v[p] || 0));
+      if (d > 0) x.a[p] = r6((x.a[p] || 0) + d); else if (d < 0) x.s[p] = r6((x.s[p] || 0) - d);
+    }
+    return o;
+  }
+  // book a one-time thing (call it after the change itself is made)
+  function once(o, key, deltas) {
+    reconcile(o);
+    const x = o.led.dev[devId];
+    if (!x.u[key]) x.u[key] = Object.assign({}, deltas);
+  }
+  const did = (o, key) => !!o.led && Object.values(o.led.dev).some(x => x.u[key]);
+  // the ledger's values written back into the fields the game reads
+  function settle(o) {
+    const v = values(o.led);
+    for (const p of paths(o)) {
+      let x = v[p] || 0;
+      if (p.startsWith('upg.')) x = Math.min(UPG_COST.length, Math.max(0, Math.round(x)));
+      else if (p.startsWith('items.') || p.startsWith('mlvl.')) x = Math.max(0, Math.round(x));
+      else if (p !== 'wallet') x = Math.max(0, x);
+      setP(o, p, x);
+    }
+    return o;
+  }
+  const maxMap = (a, b) => { const o = Object.assign({}, a); for (const k in b) o[k] = Math.max(o[k] || 0, b[k]); return o; };
+  // two copies of the same account: L is this device's, C the cloud's. localFirst: the cloud copy has not changed
+  // since this device last synced it (used only to pick between two different starting balances)
+  function merge(L, C, localFirst) {
+    L = clean(L); C = clean(C);
+    reconcile(L);
+    // a copy written by an older version of the game may have changed numbers without booking them
+    if (C.led) reconcile(C, 'old'); else C.led = startLed(C, 'legacy');
+    const newer = (C.t || 0) > (L.t || 0) ? C : L, older = newer === L ? C : L;
+    const out = Object.assign({}, older, newer);
+    const pick = L.led.id === C.led.id ? L.led : localFirst ? L.led : C.led;
+    const led = { id: pick.id, base: Object.assign({}, pick.base), dev: {} };
+    for (const d of new Set([...Object.keys(L.led.dev), ...Object.keys(C.led.dev)])) {
+      const a = L.led.dev[d] || { a: {}, s: {}, u: {} }, b = C.led.dev[d] || { a: {}, s: {}, u: {} };
+      led.dev[d] = { a: maxMap(a.a, b.a), s: maxMap(a.s, b.s), u: Object.assign({}, b.u, a.u) };
+    }
+    out.led = led;
+    out.owned = [...new Set([...older.owned, ...newer.owned])];
+    out.ach = Object.assign({}, newer.ach, older.ach);
+    out.tutDone = older.tutDone || newer.tutDone;
+    out.best = better(older.best, newer.best); out.bestAva = better(older.bestAva, newer.bestAva);
+    out.bests = {}; for (const m of new Set([...Object.keys(older.bests), ...Object.keys(newer.bests)])) out.bests[m] = better(older.bests[m], newer.bests[m]);
+    const a = older.dailyRec, b = newer.dailyRec;
+    out.dailyRec = a && b ? (a.date === b.date ? Object.assign({ date: a.date }, better(a, b), { done: a.done || b.done }) : a.date > b.date ? a : b) : a || b || null;
+    const da = older.daily, db = newer.daily;
+    if (da || db) out.daily = !da ? db : !db ? da : da.last === db.last ? { last: da.last, streak: Math.max(da.streak, db.streak) } : (dayNum(da.last) > dayNum(db.last) ? da : db);
+    out.board = {};
+    for (const m of new Set([...Object.keys(older.board), ...Object.keys(newer.board)])) {
+      const seen = new Set();
+      out.board[m] = [...(newer.board[m] || []), ...(older.board[m] || [])]
+        .filter(r => { const k = r.date + '|' + r.dist + '|' + r.score; if (seen.has(k)) return false; seen.add(k); return true; })
+        .sort((x, y) => y.dist - x.dist || y.score - x.score).slice(0, 10);
+    }
+    out.stats = Object.assign({}, older.stats, newer.stats, { scenes: [...new Set([...(older.stats.scenes || []), ...(newer.stats.scenes || [])])] });
+    out.mlvl = Object.assign({}, older.mlvl, newer.mlvl);
+    out.t = Math.max(L.t || 0, C.t || 0);
+    for (const k of LOCAL_ONLY) if (L[k] !== undefined) out[k] = L[k]; else delete out[k];
+    return settle(out);
+  }
+  // 'Y-M-D' with or without padding, compared as numbers
+  const dayNum = s => { const m = /^(\d+)-(\d+)-(\d+)$/.exec(s || ''); return m ? +m[1] * 1e4 + +m[2] * 100 + +m[3] : 0; };
+  function cloudCopy(o) { const d = {}; for (const k in o) if (!LOCAL_ONLY.includes(k)) d[k] = o[k]; return d; }
+  // ---- reading and writing, with checksums and backups ----
+  function parse(s) { try { const o = JSON.parse(s); return o && typeof o === 'object' ? o : null; } catch (e) { return null; } }
+  function backups(key) { const b = parse(ls.get(key + '#bak')); return Array.isArray(b) ? b.filter(x => x && x.s && x.h === fnv(x.s)) : []; }
+  function backup(key, s, force) {
+    const list = backups(key);
+    if (!force && list[0] && Date.now() - list[0].t < BAK_GAP) return;
+    if (list[0] && list[0].s === s) return;
+    list.unshift({ t: Date.now(), s, h: fnv(s) });
+    ls.set(key + '#bak', JSON.stringify(list.slice(0, BAK_N)));
+  }
+  const lastWrite = {};
+  let restored = false;
+  function read(key) {
+    const s = ls.get(key);
+    if (s !== null) {
+      const h = ls.get(key + '#h'), o = parse(s);
+      // a copy from before checksums has none; one whose checksum doesn't match was cut off or edited
+      if (o && (h === null || h === fnv(s))) return clean(o);
+    }
+    for (const b of backups(key)) { const o = parse(b.s); if (o) { restored = restored || s !== null; return clean(o); } }
+    return null;
+  }
+  function write(key, o) {
+    const s = JSON.stringify(o);
+    if (lastWrite[key] === s) return true;
+    const ok = ls.set(key, s) && ls.set(key + '#h', fnv(s));
+    if (ok) { lastWrite[key] = s; backup(key, s); }
+    return ok;
+  }
+  // the backups that differ from the copy in use, newest first
+  const older = key => { const cur = ls.get(key); return backups(key).filter(b => b.s !== cur); };
+  function restore(key) {
+    const b = older(key)[0]; if (!b) return null;
+    const cur = ls.get(key); if (cur) backup(key, cur, true);
+    const o = parse(b.s); return o ? clean(o) : null;
+  }
+  // the old single copy (before accounts had their own) belongs to whoever it was last synced with
+  function migrate(uid) {
+    if (ls.get(GUEST + '#moved')) return;
+    const old = read(GUEST);
+    ls.set(GUEST + '#moved', '1');
+    if (!old || !old.syncUid) return;
+    if (!read(keyOf(old.syncUid))) write(keyOf(old.syncUid), old);
+    const g = blank(); g.tutDone = old.tutDone; g.v = 3;
+    backup(GUEST, JSON.stringify(old), true);
+    write(GUEST, g);
+  }
+  // does this guest copy hold anything worth bringing into an account
+  const hasProgress = g => !!g && (g.wallet > 0 || Object.values(g.items).some(n => n > 0) || Object.values(g.upg).some(n => n > 0) || g.owned.length > 1 || (g.stats.runs || 0) > 0 || Object.values(g.bests).some(b => b.dist > 0));
+  // a guest's progress brought into an account copy: totals added, records and unlocks joined, upgrades raised
+  function absorb(o, g) {
+    const key = 'guest.' + g.pid;
+    if (did(o, key)) return false;
+    reconcile(o);
+    const dl = { wallet: Math.max(0, g.wallet) };
+    for (const it of ITEMS) dl['items.' + it.id] = g.items[it.id] || 0;
+    for (const u of UPGRADES) dl['upg.' + u.id] = Math.max(0, (g.upg[u.id] || 0) - (o.upg[u.id] || 0));
+    for (const k in g.stats) if (k !== 'scenes') dl['stats.' + k] = g.stats[k];
+    for (const p in dl) { if (!dl[p]) { delete dl[p]; continue; } setP(o, p, (Number(getP(o, p)) || 0) + dl[p]); }
+    once(o, key, dl);
+    o.owned = [...new Set([...o.owned, ...g.owned])];
+    o.ach = Object.assign({}, g.ach, o.ach);
+    o.tutDone = o.tutDone || g.tutDone;
+    for (const m in g.bests) o.bests[m] = better(o.bests[m], g.bests[m]);
+    o.best = better(o.best, g.best); o.bestAva = better(o.bestAva, g.bestAva);
+    o.stats.scenes = [...new Set([...(o.stats.scenes || []), ...(g.stats.scenes || [])])];
+    for (const m in g.board) {
+      const seen = new Set();
+      o.board[m] = [...(o.board[m] || []), ...g.board[m]].filter(r => { const k = r.date + '|' + r.dist + '|' + r.score; if (seen.has(k)) return false; seen.add(k); return true; })
+        .sort((x, y) => y.dist - x.dist || y.score - x.score).slice(0, 10);
+    }
+    if (g.dailyRec && (!o.dailyRec || o.dailyRec.date === g.dailyRec.date)) o.dailyRec = o.dailyRec ? Object.assign({}, o.dailyRec, better(o.dailyRec, g.dailyRec), { done: o.dailyRec.done || g.dailyRec.done }) : g.dailyRec;
+    return true;
+  }
+  return { GUEST, keyOf, older, get restored() { return restored; }, get devId() { return devId; }, uuid, fnv, blank, clean, read, write, backups, backup, restore, migrate, merge, reconcile, once, did, settle, values, cloudCopy, hasProgress, absorb, LOCAL_ONLY, ls };
+})();
+// which copy is in use: the signed-in account's own, or the guest's
+let profileUid = (() => { try { const a = JSON.parse(localStorage.getItem('snowcity-auth') || 'null'); return (a && a.uid) || ''; } catch (e) { return ''; } })();
+Store.migrate();
+const save = Store.read(Store.keyOf(profileUid)) || Store.blank();
+Store.reconcile(save);
+function persist() { save.t = Date.now(); Store.reconcile(save); Store.write(Store.keyOf(profileUid), save); if (persist.hook) persist.hook(); }
+// the daily challenge plays by one set of rules for everybody: the same upgrade levels, no run items, no revives
+const DAILY_VER = 2, DAILY_RULES = { upg: { magnet: 2, double: 2, shield: 2, heal: 2, luck: 2 } };
+// the rules of the run being built or ridden (fixed when the world is built, kept until the run ends)
+let RUN = { daily: false, day: '', ver: 0, upg: null };
+const U = id => (RUN.upg || save.upg)[id];
+const dur = { magnet: () => 8 + 3 * U('magnet'), double: () => 8 + 3 * U('double'), shield: () => 10 + 4 * U('shield'), hurt: () => 8 - U('heal') };
 
 // ---------- scenes ----------
 // each scene has its own slope, light, fog, sky and terrain; every junction leads into one of them
@@ -1461,7 +1744,9 @@ const pathLen = key => CH * (INDOOR[key] ? 9 + Math.floor(rnd(0, 2)) : 5 + Math.
 let DAILY_SEED = 0;
 function seeded(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 const hashStr = str => { let h = 2166136261; for (const c of str) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
-const daySeed = () => hashStr('snowcity-' + today());
+// the challenge day is Beijing's date for everybody, wherever they play, and the rules version is part of the seed
+const dailyDay = () => new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
+const daySeed = day => hashStr(`snowcity-daily-v${DAILY_VER}-${day}`);
 const withGen = (P, f) => { const r = P && P.rng; if (!r) return f(); const was = Math.random; Math.random = r; try { return f(); } finally { Math.random = was; } };
 function newPath(parent, key, d0, base, W, len, route) {
   const rt = ROUTES[key].find(r => r.id === route) || ROUTES[key][0];
@@ -2914,7 +3199,7 @@ function plain(s, e, grp, i, key) {
     const d = rnd(from + 6, e - 6), x = rnd(-5, 5);
     if (!structAt(x, d) && !zones.some(z => d > z[0] && d < z[1]) && clear(x, d, 6)) addPad(grp, x, d, i);
   }
-  if (Math.random() < P.pup + 0.06 * save.upg.luck) {
+  if (Math.random() < P.pup + 0.06 * U('luck')) {
     const d = rnd(from + 6, e - 6), x = rnd(-5, 5);
     if (!structAt(x, d) && clear(x, d, 3)) placePowerup(grp, x, d, i);
   }
@@ -4420,17 +4705,25 @@ Object.assign(TY, {
 Object.assign(HIT_TEXT, { container: '撞上集装箱了', forklift: '撞上叉车了', crate: '撞上鱼箱了', net: '被渔网缠住了', anchor: '撞上船锚了', hole: '掉进冰窟窿了', skater: '撞到滑冰的人了' });
 
 // the ice lake: reed clumps, ice sculptures (a glowing material of their own), a castle tower, a rowing boat
-const REED_GEOS = [0, 1, 2].map(v => mergeParts([
+// A reed clump in three levels of detail. Stalks are thin open three-sided prisms and the plumes tapered four-sided
+// ones (no hidden end caps), which looks the same as the old boxes at half the triangles. Level 1 keeps every other
+// stalk, level 2 every fourth, each a little thicker so the clump reads as just as dense: a stalk is under a pixel
+// wide on a phone from about 30 m away, so further off nobody can count them.
+const reedGeo = (v, lv) => mergeParts([
   ...Array.from({ length: 24 }, (_, k) => {
+    if (lv === 1 && (k + (k / 6 | 0)) % 2) return [];
+    if (lv === 2 && (k + (k / 6 | 0)) % 4) return [];
     const a = k * 2.4 + v * 0.7, r = 0.12 + (k % 6) * 0.13, x = Math.cos(a) * r, z = Math.sin(a) * r, h = 1.7 + ((k * 37 + v * 11) % 10) * 0.13;
-    const lx = x * 0.45, lz = z * 0.45;
+    const lx = x * 0.45, lz = z * 0.45, w = [0.032, 0.04, 0.055][lv];
     return [
-      { g: Bx(0.045, h, 0.045), c: k % 3 ? 0xcaa86c : 0xae8a52, p: [x + lx * h / 2, h / 2, z + lz * h / 2], r: [lz, 0, -lx] },
-      ...(k % 2 ? [] : [{ g: Bx(0.1, 0.36, 0.1), c: 0x86643f, p: [x + lx * h, h + 0.05, z + lz * h], r: [lz, 0, -lx] }]),
+      { g: new THREE.CylinderGeometry(w, w, h, 3, 1, true).rotateY(k), c: k % 3 ? 0xcaa86c : 0xae8a52, p: [x + lx * h / 2, h / 2, z + lz * h / 2], r: [lz, 0, -lx] },
+      ...(k % 2 ? [] : [{ g: new THREE.CylinderGeometry(0.04, 0.07, 0.36, 4, 1, true).rotateY(0.78), c: 0x86643f, p: [x + lx * h, h + 0.05, z + lz * h], r: [lz, 0, -lx] }]),
     ];
   }).flat(),
   { g: Ic(), c: 0xf2f6f9, p: [0, 0.05, 0], s: [0.95, 0.22, 0.95] },
-]));
+]);
+const REED_GEOS = [0, 1, 2].map(v => reedGeo(v, 0)), REED_LITE = [0, 1, 2].map(v => reedGeo(v, 1)), REED_FAR = [0, 1, 2].map(v => reedGeo(v, 2));
+
 const ICE_C = [0xc8f0ff, 0xa9e1f7, 0x8fd3f0];
 const ICE_BEAR_GEO = mergeParts([
   { g: Bx(2.0, 0.45, 2.8), c: ICE_C[2], p: [0, 0.22, 0] },
@@ -4462,7 +4755,7 @@ const ROWBOAT_GEO = mergeParts([
   { g: Bx(0.06, 0.06, 2.4), c: 0x5a3c22, p: [0.75, 0.55, 0.3], r: [0, 0.3, 0.2] },
 ]);
 SHARED_GEO.add(ICE_BEAR_GEO).add(ICE_SWAN_GEO).add(ICE_TOWER_GEO).add(ROWBOAT_GEO);
-REED_GEOS.forEach(g => SHARED_GEO.add(g));
+[...REED_GEOS, ...REED_LITE, ...REED_FAR].forEach(g => SHARED_GEO.add(g));
 // the old town (Huizhou style): white walls with stepped gables, black tiles, two-storey wooden shops, stone
 // lanterns, wine jars, arched stone bridges, black-awning boats, a pagoda and a temple hall
 const HUIW = 0xeeeae2, HUIT = 0x34373b;
@@ -4581,16 +4874,50 @@ function gapRows(s, grp, i, n, make, len, extra, fill) {
   }
   occupy(end + 2, end);
 }
-// instanced reeds, like pines()
+// Instanced reeds, grouped into cells: each side of the road, along it and further out, 50 m at a time. Each cell
+// is its own instanced mesh placed at the cell's centre, so it can be culled: off-screen cells skip the main pass and, more importantly, cells outside the
+// sun's shadow box (everything but the stretch around the rider) skip the shadow pass. The reed geometries' shared
+// bounding sphere is grown to cover the largest cell. Which level a cell shows follows its chunk's distance ahead
+// (see lodTick); clumps more than 12 m off the road are a level lighter than those along it.
+const REED_SPHERE = new THREE.Sphere(new THREE.Vector3(), 20);
+[...REED_GEOS, ...REED_LITE, ...REED_FAR].forEach(g => { g.boundingSphere = REED_SPHERE; });
 function reeds(grp, list) {
   if (!list.length) return;
-  const by = new Map();
-  for (const p of list) { const g = REED_GEOS[p[4] ?? Math.floor(rnd(0, 3))]; if (!by.has(g)) by.set(g, []); by.get(g).push(p); }
-  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0);
-  for (const [g, ps] of by) {
-    const im = new THREE.InstancedMesh(g, M.vcol, ps.length);
-    ps.forEach((p, k) => { q.setFromAxisAngle(up, rnd(0, TAU)); m4.compose(new THREE.Vector3(p[0] + cx(-p[2]), p[1], p[2]), q, new THREE.Vector3(p[3], p[3] * rnd(0.85, 1.2), p[3])); im.setMatrixAt(k, m4); });
+  const cells = new Map();
+  for (const p of list) {
+    const off = Math.abs(p[0]) - halfAt(-p[2]);
+    // the odd big clump far out in the fields is baked into the chunk's scenery mesh instead
+    if (off > 28) { grp.add(vmesh(REED_FAR[Math.floor(rnd(0, 3))], p[0], p[1], p[2], p[3], p[3] * rnd(0.85, 1.2), p[3], rnd(0, TAU))); continue; }
+    const far = off > 12, x = p[0] + cx(-p[2]), key = Math.sign(p[0]) + ':' + Math.floor(p[2] / 50) + (far ? 'f' : 'n');
+    let c = cells.get(key); if (!c) cells.set(key, c = { far, ps: [] });
+    c.ps.push([x, p[1], p[2], p[3]]);
+  }
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), v = new THREE.Vector3(), sc = new THREE.Vector3();
+  const lod = grp.userData.lod || (grp.userData.lod = []);
+  for (const { far, ps } of cells.values()) {
+    let lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity];
+    for (const p of ps) for (let j = 0; j < 3; j++) { lo[j] = Math.min(lo[j], p[j]); hi[j] = Math.max(hi[j], p[j]); }
+    const c = lo.map((a, j) => (a + hi[j]) / 2), vi = Math.floor(rnd(0, 3)), lv = [REED_GEOS[vi], REED_LITE[vi], REED_FAR[vi]];
+    const im = new THREE.InstancedMesh(lv[far ? 2 : 1], M.vcol, ps.length);
+    ps.forEach((p, k) => {
+      q.setFromAxisAngle(up, rnd(0, TAU));
+      const sy = p[3] * rnd(0.85, 1.2);
+      m4.compose(v.set(p[0] - c[0], p[1] - c[1], p[2] - c[2]), q, sc.set(p[3], sy, p[3])); im.setMatrixAt(k, m4);
+      REED_SPHERE.radius = Math.max(REED_SPHERE.radius, v.length() + 3.6 * Math.max(p[3], sy));
+    });
+    im.position.set(c[0], c[1], c[2]);
     im.castShadow = true; im.receiveShadow = true; im.userData.world = true; grp.add(im);
+    lod.push([im, lv, far ? 1 : 0]);
+  }
+}
+// the level of detail of a chunk's reeds: full for the chunk the rider is in and the next, lighter further ahead
+function lodTick() {
+  for (const c of chunks) {
+    const L = c.grp.userData.lod; if (!L || !L.length) continue;
+    const ahead = c.s - S.d, lv = ahead < Q.lod[0] ? 0 : ahead < Q.lod[1] ? 1 : 2;
+    if (c.lv === lv) continue;
+    c.lv = lv;
+    for (const [im, geos, off] of L) im.geometry = geos[Math.min(2, lv + off)];
   }
 }
 const fromOf = (s, gap) => { const P = pathAt(s); return P.parent ? P.d0 + (gap ?? 14) : -Infinity; };
@@ -5677,8 +6004,18 @@ Object.assign(RIDERS, {
   },
 });
 const SKIN_FX = { fox: { trail: 0x9a5a3a }, board: { trail: 0x4f7a8a }, panda: { trail: 0x5f8a5a }, crystal: { trail: 0x6fb8e0, fx: 0xbff4ff }, classic: { trail: 0x5f7a90 }, pari: { trail: 0x6b5a4a }, penguin: { trail: 0x6f9cc2 }, huaao: { trail: 0x9a5a6a }, polar: { trail: 0x6f8fc2 }, rocket: { trail: 0x5a4a44, fx: 0xff7a1f }, gold: { trail: 0xc8a23a, fx: 0xffd75a } };
+// what a removed object built for itself (its geometry, a material made just for it) goes back to the GPU
+let sharedMats = null;
+function disposeTree(o, mats) {
+  sharedMats = sharedMats || new Set(Object.values(M).flat());
+  o.traverse(x => {
+    if (x.geometry && !isShared(x.geometry)) x.geometry.dispose();
+    if (mats && x.material && !sharedMats.has(x.material)) { if (x.material.map) x.material.map.dispose(); x.material.dispose(); }
+  });
+}
 function applySkin() {
-  while (rider.children.length) { const c = rider.children.pop(); c.geometry.dispose(); }
+  // each rider is built with materials of its own
+  while (rider.children.length) disposeTree(rider.children.pop(), true);
   const parts = (RIDERS[save.skin] || RIDERS.classic)();
   for (const [g, m, x, y, z, rx, ry, rz, sx, sy, sz] of parts) {
     const o = new THREE.Mesh(g, m); o.position.set(x, y - 0.45, z); o.rotation.set(rx || 0, ry || 0, rz || 0);
@@ -5887,12 +6224,15 @@ function resetWorld() {
   if (S.boss) endBoss(false);
   clearFallen(true);
   chunks.forEach(dropChunk);
-  flyers.forEach(f => scene.remove(f.mesh));
+  flyers.forEach(f => { scene.remove(f.mesh); disposeTree(f.mesh); });
   chunks = []; drops = []; hills = []; dropOff = 0; kickers = []; pits = []; roofs = []; walls = []; tunnels = []; openings = []; canyons = []; ices = [];
   widths = []; gusts = []; crossings = []; bushes = []; panes = []; bumps = []; rails = []; S.grind = null;
   zones = []; pads = []; pups = []; obstacles = []; coins = []; flyers = [];
   PATHS = new Map(); pathId = 0; JN = JD = null;
-  DIFF = DIFFS[MODES[save.mode].diff]; DAILY_SEED = save.mode === 'daily' ? daySeed() : 0;
+  DIFF = DIFFS[MODES[save.mode].diff];
+  const daily = save.mode === 'daily' && !TUT, day = daily ? dailyDay() : '';
+  RUN = { daily, day, ver: daily ? DAILY_VER : 0, upg: daily ? DAILY_RULES.upg : null };
+  DAILY_SEED = daily ? daySeed(day) : 0;
   const rr = TUT ? ['resort', 'blue'] : window.__SNOW_ROOT || ['city'];
   ROOT = withGen({ rng: DAILY_SEED ? seeded(DAILY_SEED) : null }, () => newPath(null, rr[0], 0, 0, 0, TUT ? TUT_LEN : 400, rr[1])); RP = GP = ROOT; setCur(ROOT);
   // the tutorial slope ends in a two-way fork: a terrain park full of jumps, or into the woods
@@ -5906,6 +6246,8 @@ function resetWorld() {
     near: 0, nearChain: 0, nearT: -9, feverM: 0, fevers: 0, letters: '', sets: 0, flipsN: 0, scenes: new Set([ROOT.key]), mBonus: 0, mDone: S.mDone || [], mT: 0, feverOn: false,
   });
   clearTrail(); withGen(ROOT, resetWeather);
+  // the daily challenge's weather comes from the day's seed too, so everybody meets the same storms at the same metres
+  WX.rng = DAILY_SEED ? seeded(DAILY_SEED ^ 0x9e3779b9) : null;
   // the tutorial is always a clear morning
   if (TUT) { WX.phase0 = 0.12; WX.goal = WX.storm = WX.kind = 0; WX.next = TUT_LEN + 500; }
   ensureChunks(true);
@@ -5992,7 +6334,7 @@ const DAY_LEN = 7000;
 const NIGHT_SKY = ['#040915', '#0a1630', '#1b2b4b'].map(c => new THREE.Color(c)), DUSK_SKY = ['#33407a', '#c76a7c', '#f6b06a'].map(c => new THREE.Color(c));
 const NIGHT_FOG = new THREE.Color('#0f1a2e'), DUSK_FOG = new THREE.Color('#d39c8c'), STORM_FOG = new THREE.Color('#c6d0da'), STORM_NIGHT = new THREE.Color('#2b3546');
 const MOON_C = new THREE.Color('#9fb3ff'), DUSK_SUN = new THREE.Color('#ff9550');
-const WX = { phase0: 0, night: 0, dusk: 0, storm: 0, goal: 0, next: 0, kind: 0, fx: '', fog: 0, freeze: 0, tail: 0 };
+const WX = { rng: null, phase0: 0, night: 0, dusk: 0, storm: 0, goal: 0, next: 0, kind: 0, fx: '', fog: 0, freeze: 0, tail: 0 };
 const WX_FX = {
   fog: { on: '起大雾了', tip: '雾里看不远，跟着金币走', off: '雾散了', chip: '大雾' },
   freeze: { on: '冻雨！路面结冰了', tip: '整条路都在打滑，提前转向', off: '冰化了', chip: '路面结冰' },
@@ -6016,7 +6358,7 @@ function tickWeather(dt) {
   WX.night = band(ph, 0.38, 0.47, 0.8, 0.9);
   WX.dusk = band(ph, 0.3, 0.4, 0.42, 0.5) + 0.8 * band(ph, 0.78, 0.84, 0.88, 0.95);
   if (S.state === 'play' && S.d > WX.next) {
-    const r = Math.random(), k = r < 0.4 ? 0 : r < 0.6 ? 0.5 : r < 0.75 ? 1 : 0, fx = r < 0.75 ? '' : r < 0.84 ? 'fog' : r < 0.92 ? 'freeze' : 'tail';
+    const R = WX.rng || Math.random, r = R(), k = r < 0.4 ? 0 : r < 0.6 ? 0.5 : r < 0.75 ? 1 : 0, fx = r < 0.75 ? '' : r < 0.84 ? 'fog' : r < 0.92 ? 'freeze' : 'tail';
     if (k !== WX.kind) {
       if (k === 1) toast('暴风雪来了！', 'warn'); else if (WX.kind === 1) toast('风雪停了');
       if (k === 1) tip('暴风雪里看不远，风会把雪橇往旁边推', 4000);
@@ -6025,7 +6367,7 @@ function tickWeather(dt) {
       if (fx) { toast(WX_FX[fx].on, fx === 'tail' ? 'boost' : 'warn'); tip(WX_FX[fx].tip, 4000); buzz(30); }
       else if (WX.fx && k !== 1) toast(WX_FX[WX.fx].off);
     }
-    WX.kind = WX.goal = k; WX.fx = fx; WX.next = S.d + rnd(900, 1700) * (k === 1 || fx ? 0.45 : 1);
+    WX.kind = WX.goal = k; WX.fx = fx; WX.next = S.d + (900 + R() * 800) * (k === 1 || fx ? 0.45 : 1);
   }
   WX.storm += (WX.goal - WX.storm) * Math.min(1, dt * 0.35);
   for (const f of ['fog', 'freeze', 'tail']) WX[f] += ((WX.fx === f ? 1 : 0) - WX[f]) * Math.min(1, dt * 0.5);
@@ -6109,6 +6451,7 @@ function showPanel(p) { [ui.menu, ui.over, ui.shop].forEach(x => x.hidden = x !=
 const reviveCost = () => 80 * Math.pow(2, S.revives);
 const coinIcon = '<span class="coin sm"></span>';
 function renderLoadout() {
+  if (save.mode === 'daily') { $('loadout').innerHTML = `<span class="empty">每日挑战人人一样：升级都按 ${DAILY_RULES.upg.magnet} 级算，不带开局道具，不能复活</span>`; return; }
   const owned = ITEMS.filter(it => it.id !== 'revive' && save.items[it.id] > 0);
   $('loadout').innerHTML = owned.length
     ? owned.map(it => `<button type="button" class="tog${save.use[it.id] ? ' on' : ''}" data-use="${it.id}" aria-pressed="${!!save.use[it.id]}"><i class="pic" style="background-image:url(${iconURL(it.id)})"></i>${it.name}<em>×${save.items[it.id]}</em></button>`).join('')
@@ -6125,8 +6468,8 @@ function refreshWallets() {
   $('bestLine').textContent = b.dist > 0 ? `${save.mode === 'normal' ? '' : MODES[save.mode].name + ' · '}${save.mode === 'daily' ? '今天' : ''}最远 ${b.dist}m` : '';
   document.querySelectorAll('#modeSel button').forEach(el => el.setAttribute('aria-pressed', el.dataset.m === save.mode));
   const tokens = save.items.revive, cost = reviveCost();
-  $('reviveBtn').innerHTML = tokens > 0 ? `用复活币复活（剩 ${tokens} 个）` : `原地复活 ${coinIcon}${cost}`;
-  $('reviveBtn').disabled = !tokens && save.wallet < cost;
+  $('reviveBtn').innerHTML = RUN.daily ? '每日挑战不能复活' : tokens > 0 ? `用复活币复活（剩 ${tokens} 个）` : `原地复活 ${coinIcon}${cost}`;
+  $('reviveBtn').disabled = RUN.daily || (!tokens && save.wallet < cost);
   renderLoadout();
   fillMissions(); renderMissions($('menuMissions'));
 }
@@ -6144,7 +6487,7 @@ const score = () => Math.floor(S.pts + S.d);
 const bestOf = m => {
   m = m || save.mode;
   // the daily challenge keeps only today's record
-  if (m === 'daily') { if (!save.dailyRec || save.dailyRec.date !== today()) save.dailyRec = { date: today(), dist: 0, score: 0, done: false }; return save.dailyRec; }
+  if (m === 'daily') { const day = (S.state === 'menu' ? dailyDay() : RUN.day) || dailyDay(); if (!save.dailyRec || save.dailyRec.date !== day) save.dailyRec = { date: day, dist: 0, score: 0, done: false }; return save.dailyRec; }
   return save.bests[m] || (save.bests[m] = { dist: 0, score: 0 });
 };
 // what this run is worth in coins: what you picked up (with the bonus item), plus 1 coin per 100 m
@@ -6161,12 +6504,12 @@ function start() {
   // a new player's first run (or a replay asked for from the menu) is the tutorial course
   const tut = tutForce || (!save.tutDone && save.mode === 'normal');
   tutForce = false; TUT = tut ? { i: 0, on: false } : null; tutHold = null;
-  if (S.state !== 'menu' || tut || ROOT.tut) resetWorld();
+  if (S.state !== 'menu' || tut || ROOT.tut || (save.mode === 'daily' && RUN.day !== dailyDay())) resetWorld();
   S.state = 'play'; S.mode = save.mode; S.bestAtStart = bestOf(S.mode).dist;
   // run items switched on in the menu are used up now
   const used = [];
   for (const id of ['dash', 'shield', 'magnet', 'coin2']) {
-    if (!save.use[id]) continue;
+    if (!save.use[id] || RUN.daily) continue;
     if (save.items[id] <= 0) { save.use[id] = false; continue; }
     save.items[id]--; used.push(id);
     if (id === 'dash') { S.dash = S.d + 500; S.dashLen = 500; }
@@ -6235,6 +6578,7 @@ function safeSpot(from) {
   return { d: Math.min(from + 10, lim - 2), x: 0 };
 }
 function revive() {
+  if (RUN.daily) return;
   if (save.items.revive > 0) save.items.revive--;
   else { const cost = reviveCost(); if (save.wallet < cost) return; save.wallet -= cost; }
   persist(); S.revives++;
@@ -6287,13 +6631,13 @@ $('shopList').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || b.disabled) return;
   if (b.dataset.upg) {
     const id = b.dataset.upg, cost = UPG_COST[save.upg[id]];
-    if (save.wallet >= cost) { save.wallet -= cost; save.upg[id]++; persist(); sfx.power(); }
+    if (save.wallet >= cost) { save.wallet -= cost; save.upg[id]++; Store.once(save, `upg.${id}.${save.upg[id]}`, { wallet: -cost, ['upg.' + id]: 1 }); persist(); sfx.power(); }
   } else if (b.dataset.item) {
     const it = ITEMS.find(x => x.id === b.dataset.item);
     if (save.wallet >= it.price && save.items[it.id] < ITEM_MAX) { save.wallet -= it.price; save.items[it.id]++; if (it.id !== 'revive') save.use[it.id] = true; persist(); sfx.power(); }
   } else if (b.dataset.skin) {
     const k = SKINS.find(x => x.id === b.dataset.skin);
-    if (!save.owned.includes(k.id)) { if (k.lock || save.wallet < k.price) return; save.wallet -= k.price; save.owned.push(k.id); sfx.power(); }
+    if (!save.owned.includes(k.id)) { if (k.lock || save.wallet < k.price) return; save.wallet -= k.price; save.owned.push(k.id); Store.once(save, 'skin.' + k.id, { wallet: -k.price }); sfx.power(); }
     save.skin = k.id; persist(); applySkin();
   }
   renderShop();
@@ -6306,6 +6650,19 @@ $('shopBack').addEventListener('click', () => { refreshWallets(); showPanel(shop
 $('menuShop').addEventListener('click', () => openShop(ui.menu));
 // ---------- settings and the change log ----------
 const CHANGELOG = [
+  ['v20', '10月24日', [
+    '云存档改成按设备记账：两台手机离线各自赚的金币、道具和累计数据会加在一起，花掉的金币不会再从另一台设备的旧存档里冒回来',
+    '同一个成就、同一天的每日奖励、同一件外观或同一级升级在两台设备上各拿了一次，合并时只算一次，多花的金币退回',
+    '每个账号在本机有自己的一份存档：退出或换账号不会把上一个账号的进度带过去；游客进度要你确认才并入账号，并入后游客进度清零，不会被并进第二个账号',
+    '每日挑战人人同一套规则：升级统一按 2 级算，不带开局道具、不能复活；道路和天气都用同一个种子，按北京时间换天，开局时锁定日期和规则版本，跨零点也算开局那天',
+    '暂停和 3-2-1 倒计时期间不再响应任何操作；切走或失焦会松开所有按键并暂停；多根手指同时按时不会互相抢方向，抬起的手指会把方向交给还按着的那根',
+    '设置里能看到准确的同步状态和上次成功同步的时间，首页也有小标签；同步失败会自动重试，网络恢复后马上补传，还有「立即同步」按钮',
+    '两台设备同时上传不会再互相覆盖：云端存档带版本号，被抢先时自动拉取合并再传',
+    '新增画质档位：自动、流畅、均衡、精致；自动档在手机跑不动时会自己降一档',
+    '存档每次写入都带校验，自动保留最近几份备份，存档损坏时自动从备份恢复，设置里也能手动恢复',
+    '芦苇荡大幅减负：芦苇改用更省的造型和远近分级，按区块剔除，阴影只画骑手附近的，每帧要画的顶点减少约四分之三，看起来和原来一样密',
+    '修好几处显存泄漏：被撞飞的障碍、换角色、幽灵名牌用过的模型和贴图都会释放',
+  ]],
   ['v19', '10月23日', [
     '新手教程：第一次开局是一段固定的初级道，一步一步教转向、钻灌木、跳台后空翻、转体、道具、滑轨和岔路口',
     '教到新动作时画面会停住，屏幕上画出手势，做对了才继续，不用担心字还没看完就落地',
@@ -6393,7 +6750,7 @@ const CHANGELOG = [
   ['v2', '10月18日', ['手机上过岔路口镜头提前转向', '障碍密度有上限，最高速也一定有路可走']],
   ['v1', '10月17日', ['雪城速降上线：城市、森林、村庄、雪山多场景无尽滑雪']],
 ];
-const SETTINGS = (() => { let o = {}; try { o = JSON.parse(localStorage.getItem('snowcity-set') || '{}'); } catch (e) {} return Object.assign({ sfx: true, music: true, buzz: true, fps: false, seen: '', ghost: true, hand: 'off' }, o); })();
+const SETTINGS = (() => { let o = {}; try { o = JSON.parse(localStorage.getItem('snowcity-set') || '{}'); } catch (e) {} return Object.assign({ sfx: true, music: true, buzz: true, fps: false, seen: '', ghost: true, hand: 'off', q: 'auto' }, o); })();
 function saveSettings() { try { localStorage.setItem('snowcity-set', JSON.stringify(SETTINGS)); } catch (e) {} }
 function applySettings() {
   soundOn = SETTINGS.sfx || SETTINGS.music; musicOn = SETTINGS.music;
@@ -6428,7 +6785,8 @@ function renderDaily() {
 $('dailyClaim').addEventListener('click', () => {
   const st = dailyState(); if (!st.can) return;
   save.wallet += DAILY[st.day - 1]; if (st.day === 7) save.items.revive++;
-  save.daily = { last: today(), streak: st.day }; persist(); refreshWallets(); sfx.power && initAudio(); renderDaily();
+  save.daily = { last: today(), streak: st.day };
+  Store.once(save, 'daily.' + today(), st.day === 7 ? { wallet: DAILY[6], 'items.revive': 1 } : { wallet: DAILY[st.day - 1] }); persist(); refreshWallets(); sfx.power && initAudio(); renderDaily();
   toast(`+${DAILY[st.day - 1]} 金币`, 'boost'); setTimeout(closeSheet, 700);
 });
 function openSheet(which) {
@@ -6437,7 +6795,7 @@ function openSheet(which) {
   if (which === 'missions') setMisTab(misTab);
   if (which === 'board') renderBoard();
   if (which === 'daily') renderDaily();
-  if (which === 'set') { SETTINGS.seen = CHANGELOG[0][0]; saveSettings(); $('setDot').hidden = true; }
+  if (which === 'set') { SETTINGS.seen = CHANGELOG[0][0]; saveSettings(); $('setDot').hidden = true; renderAcct(); renderBak(); }
   if (which === 'help') { try { localStorage.setItem('snowcity-help', '1'); } catch (e) {} $('helpDot').hidden = true; }
   $('sheet').classList.remove('closing'); $('sheet').hidden = false; $('sheetClose').focus();
 }
@@ -6456,11 +6814,13 @@ const closeSheet = () => closePanel($('sheet'));
 $('sheetClose').addEventListener('click', closeSheet);
 $('sheet').addEventListener('click', e => { if (e.target.id === 'sheet') closeSheet(); });
 // back to the home screen after a run: missions met in that run are swapped for new ones
-$('homeBtn').addEventListener('click', () => {
+function goHome() {
   retireMissions(); resetWorld();
   ui.hud.hidden = true; ui.sound.hidden = true; ui.hint.hidden = true; ui.sign.hidden = true;
   refreshWallets(); showPanel(ui.menu); $('startBtn').focus({ preventScroll: true });
-});
+  Cloud.run(true);
+}
+$('homeBtn').addEventListener('click', goHome);
 $('overShop').addEventListener('click', () => openShop(ui.over));
 $('startBtn').addEventListener('click', start);
 $('modeSel').innerHTML = Object.entries(MODES).map(([k, m]) => `<button type="button" data-m="${k}"><b>${m.name}</b><small>${m.sub}</small></button>`).join('');
@@ -6478,25 +6838,38 @@ ui.sound.addEventListener('click', () => {
 });
 
 // ---------- input ----------
+// Nothing steers, flips or spins while the game is paused or counting back in. Every finger is tracked by its own
+// id: the first one on the slope steers, a second one can't hijack it, and lifting the first hands steering to a
+// finger still down (from where it is, so the sled doesn't jump). Losing focus lets go of every key and finger.
 const keys = { l: false, r: false };
 let drag = null;
+const fingers = new Map();
+const inputOn = () => S.state === 'play' && !paused;
 function requestFlip() {
-  if (S.state !== 'play' || S.grounded || S.y - groundAt(S.x, S.d) < 0.6) return;
+  if (!inputOn() || S.grounded || S.y - groundAt(S.x, S.d) < 0.6) return;
   S.flipT += TAU; sfx.flip();
 }
 // a down swipe in the air spins the sled a full turn, the way it is already drifting
 function requestSpin() {
-  if (S.state !== 'play' || S.grounded || S.y - groundAt(S.x, S.d) < 0.6) return;
+  if (!inputOn() || S.grounded || S.y - groundAt(S.x, S.d) < 0.6) return;
   const dir = Math.sign(S.spinT) || (S.tx >= S.x ? 1 : -1);
   S.spinT += dir * TAU; sfx.flip();
 }
+// fingers still on the glass are remembered through a pause (one can take over after the countdown); losing focus
+// forgets them too, since their lift may never arrive
+function releaseInput(all) {
+  keys.l = keys.r = false; drag = null; if (all) fingers.clear();
+  for (const id of ['hpL', 'hpR']) { const b = $(id); if (b) b.classList.remove('on'); }
+}
 addEventListener('keydown', e => {
   if (e.target && e.target.tagName === 'INPUT') return;
-  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.l = true;
-  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.r = true;
-  if (S.state === 'play' && !e.repeat && (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === ' ')) { e.preventDefault(); requestFlip(); }
-  if (S.state === 'play' && !e.repeat && (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S')) { e.preventDefault(); requestSpin(); }
-  if ((e.key === ' ' || e.key === 'Enter') && S.state !== 'play' && S.state !== 'crash' && document.activeElement?.tagName !== 'BUTTON' && document.activeElement?.tagName !== 'INPUT' && $('welcome').hidden) {
+  if (inputOn()) {
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.l = true;
+    if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.r = true;
+    if (!e.repeat && (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === ' ')) { e.preventDefault(); requestFlip(); }
+    if (!e.repeat && (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S')) { e.preventDefault(); requestSpin(); }
+  } else if (S.state === 'play' && [' ', 'ArrowUp', 'ArrowDown'].includes(e.key)) e.preventDefault();
+  if ((e.key === ' ' || e.key === 'Enter') && S.state !== 'play' && S.state !== 'crash' && document.activeElement?.tagName !== 'BUTTON' && document.activeElement?.tagName !== 'INPUT' && $('welcome').hidden && $('migrate').hidden) {
     e.preventDefault();
     if (!ui.menu.hidden) start(); else if (!ui.over.hidden) $('retryBtn').click();
   }
@@ -6505,11 +6878,22 @@ addEventListener('keyup', e => {
   if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.l = false;
   if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.r = false;
 });
-renderer.domElement.addEventListener('pointerdown', e => { if (S.state === 'play') drag = { x0: e.clientX, tx0: S.tx, y0: e.clientY, yh: e.clientY, th: performance.now(), ys: e.clientY }; });
-// while the tutorial waits for a spin, any clear down stroke counts, however slow
-addEventListener('pointermove', e => { if (tutHold && tutHold.g === 'down' && drag && e.clientY - drag.ys > 50) { drag.ys = e.clientY; requestSpin(); } });
+addEventListener('blur', () => interruptGame());
+const grab = (id, x, y) => ({ id, x0: x, tx0: S.tx, y0: y, yh: y, th: performance.now(), ys: y });
+renderer.domElement.addEventListener('pointerdown', e => {
+  fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (inputOn() && !drag) drag = grab(e.pointerId, e.clientX, e.clientY);
+});
+renderer.domElement.addEventListener('contextmenu', e => e.preventDefault());
 addEventListener('pointermove', e => {
-  if (!drag) return;
+  const f = fingers.get(e.pointerId); if (!f) return;
+  f.x = e.clientX; f.y = e.clientY;
+  if (!inputOn()) { drag = null; return; }
+  // a finger held down through the countdown takes over from where it is now
+  if (!drag) drag = grab(e.pointerId, e.clientX, e.clientY);
+  if (e.pointerId !== drag.id) return;
+  // while the tutorial waits for a spin, any clear down stroke counts, however slow
+  if (tutHold && tutHold.g === 'down' && e.clientY - drag.ys > 50) { drag.ys = e.clientY; requestSpin(); }
   const k = (2 * BH * 1.3) / Math.min(innerWidth, 700), H = halfAt(S.d);
   S.tx = clamp(drag.tx0 + (e.clientX - drag.x0) * k, -H, H);
   // up swipe: flip (measured from the lowest point the finger reached); quick down flick: spin
@@ -6521,8 +6905,15 @@ addEventListener('pointermove', e => {
     if (e.clientY < drag.yh || now - drag.th > 220) { drag.yh = e.clientY; drag.th = now; }
   }
 });
-addEventListener('pointerup', () => drag = null);
-addEventListener('pointercancel', () => drag = null);
+function liftFinger(e) {
+  fingers.delete(e.pointerId);
+  if (!drag || drag.id !== e.pointerId) return;
+  drag = null;
+  const next = [...fingers][0];
+  if (next && inputOn()) drag = grab(next[0], next[1].x, next[1].y);
+}
+addEventListener('pointerup', liftFinger);
+addEventListener('pointercancel', liftFinger);
 
 // ---------- rules: a small mistake hurts; a second one while hurt ends the run ----------
 function pop(text) { ui.pop.textContent = text; popAlt = !popAlt; ui.pop.className = 'show' + (popAlt ? ' alt' : ''); }
@@ -6626,7 +7017,7 @@ const lifeVal = k => { const st = save.stats; return k === 'scenes' ? (st.scenes
 const achVal = a => a.life ? lifeVal(a.life) : a.v();
 function unlockAch(a) {
   if (save.ach[a.id]) return;
-  save.ach[a.id] = today2(); save.wallet += a.reward;
+  save.ach[a.id] = today2(); save.wallet += a.reward; Store.once(save, 'ach.' + a.id, { wallet: a.reward });
   let msg = `成就「${a.name}」+${a.reward} 金币`;
   if (a.skin && !save.owned.includes(a.skin)) { save.owned.push(a.skin); msg += `，解锁${SKINS.find(k => k.id === a.skin).name}`; }
   persist();
@@ -6645,11 +7036,11 @@ function finishRun() {
   st.scenes = [...new Set([...(st.scenes || []), ...S.scenes])];
   if (S.mode === 'daily') {
     const rec = bestOf('daily');
-    if (!rec.done && S.d >= DAILY_GOAL) { rec.done = true; st.daily = (st.daily || 0) + 1; save.wallet += 200; achNew.push('每日挑战完成 +200 金币'); }
+    if (!rec.done && S.d >= DAILY_GOAL) { rec.done = true; st.daily = (st.daily || 0) + 1; save.wallet += 200; Store.once(save, 'dch.' + RUN.day, { wallet: 200, 'stats.daily': 1 }); achNew.push('每日挑战完成 +200 金币'); }
   }
   S.rec = now;
   // the top ten: a revived run updates its own line instead of adding another
-  const list = save.board[S.mode] || (save.board[S.mode] = []), row = S.row || (S.row = { date: today2(), skin: save.skin });
+  const list = save.board[S.mode] || (save.board[S.mode] = []), row = S.row || (S.row = Object.assign({ date: today2(), skin: save.skin }, S.mode === 'daily' ? { day: RUN.day, ver: RUN.ver } : {}));
   Object.assign(row, { dist: now.d, score: score() });
   if (!list.includes(row)) list.push(row);
   list.sort((a, b) => b.dist - a.dist || b.score - a.score);
@@ -6663,14 +7054,15 @@ function finishRun() {
 // the ghost: where the rider was every fifth of a second (distance, lane, height above the snow)
 const GHOST_DT = 0.2;
 let ghostRec = null, ghostRun = null;
-const ghostKey = m => 'snowcity-ghost-' + (m === 'daily' ? 'daily-' + today() : m);
+const ghostPre = () => 'snowcity-ghost-' + (profileUid ? profileUid.slice(0, 8) + '-' : '');
+const ghostKey = m => ghostPre() + (m === 'daily' ? 'daily-' + (RUN.day || dailyDay()) : m);
 function loadGhost(m) { try { const g = JSON.parse(localStorage.getItem(ghostKey(m)) || 'null'); return g && g.d && g.d.length > 10 ? g : null; } catch (e) { return null; } }
 function saveGhost() {
   if (!ghostRec || ghostRec.d.length < 20) return;
   const old = loadGhost(S.mode);
   if (old && old.dist >= Math.floor(S.d)) return;
   try {
-    if (S.mode === 'daily') for (let k = localStorage.length - 1; k >= 0; k--) { const key = localStorage.key(k); if (key && key.startsWith('snowcity-ghost-daily-') && key !== ghostKey('daily')) localStorage.removeItem(key); }
+    if (S.mode === 'daily') for (let k = localStorage.length - 1; k >= 0; k--) { const key = localStorage.key(k); if (key && key.startsWith(ghostPre() + 'daily-') && key !== ghostKey('daily')) localStorage.removeItem(key); }
     localStorage.setItem(ghostKey(S.mode), JSON.stringify({ dist: Math.floor(S.d), date: today2(), skin: save.skin, ...ghostRec }));
   } catch (e) {}
 }
@@ -6680,6 +7072,8 @@ let ghostTag = null;
 function ghostStart() {
   ghostRec = { d: [], x: [], h: [] };
   ghostRun = SETTINGS.ghost !== false && !TUT ? loadGhost(S.mode) : null;
+  // the name tag is drawn for each run: its texture and material go with it
+  if (ghostTag) { ghostTag.material.map.dispose(); ghostTag.material.dispose(); ghostTag = null; }
   while (ghost.children.length) ghost.remove(ghost.children[0]);
   if (!ghostRun) return;
   const r = rider.clone(); r.traverse(o => { if (o.isMesh) { o.material = ghostMat; o.castShadow = false; } }); r.rotation.set(0, 0, 0); ghost.add(r);
@@ -7349,7 +7743,7 @@ function update(dt) {
     f.mesh.position.x += f.v[0] * dt; f.mesh.position.y += f.v[1] * dt; f.mesh.position.z += f.v[2] * dt;
     f.mesh.rotation.x += f.spin * dt; f.mesh.rotation.z += f.spin * 0.6 * dt;
   }
-  flyers = flyers.filter(f => { if (f.t > 1.4) { scene.remove(f.mesh); return false; } return true; });
+  flyers = flyers.filter(f => { if (f.t > 1.4) { scene.remove(f.mesh); disposeTree(f.mesh); return false; } return true; });
   spray.step(dt); leaves.step(dt); shards.step(dt); fxp.step(dt); sparks.step(dt); powder.step(dt); vapor.step(dt); stepLife(dt); ghostStep();
 
   // camera: follows the road round the bend, stays under the ceiling indoors, looks up a climb
@@ -7436,16 +7830,37 @@ function update(dt) {
 
 let last = performance.now();
 let fpsN = 0, fpsT = 0;
-// resolution follows the frame rate: a phone that can't hold ~50 fps renders a little softer instead of stuttering,
-// and goes back up once it has had a long run of smooth frames
-const PR_MAX = Math.min(devicePixelRatio || 1, 2), PR_MIN = Math.min(PR_MAX, 1);
-let prNow = PR_MAX, slowT = 0, fastT = 0;
+// ---------- picture quality ----------
+// 自动 starts at 精致 (均衡 on a small screen) and drops a tier by itself if even its lowest resolution can't keep up.
+// The tiers trade resolution, shadow detail, the amount of falling snow and how near the reeds get their full detail.
+// Within a tier, resolution follows the frame rate: a phone that can't hold ~50 fps renders a little softer instead
+// of stuttering, and goes back up once it has had a long run of smooth frames.
+const QUALITY = {
+  low: { pr: 1, prMin: 0.75, shadow: 1024, snow: 260, lod: [20, 70] },
+  mid: { pr: 1.5, prMin: 1, shadow: 1024, snow: 450, lod: [30, 100] },
+  high: { pr: 2, prMin: 1, shadow: 2048, snow: 700, lod: [40, 130] },
+};
+const TIERS = ['low', 'mid', 'high'];
+let Q = QUALITY.high, autoTier = lowPower ? 'mid' : 'high';
+let PR_MAX = 1, PR_MIN = 1, prNow = 1, slowT = 0, fastT = 0, stuckT = 0;
+function applyQuality() {
+  const pick = SETTINGS.q && SETTINGS.q !== 'auto' ? SETTINGS.q : autoTier;
+  Q = QUALITY[pick] || QUALITY.high;
+  PR_MAX = Math.min(devicePixelRatio || 1, Q.pr); PR_MIN = Math.min(PR_MAX, Q.prMin); prNow = PR_MAX; renderer.setPixelRatio(prNow);
+  if (sun.shadow.mapSize.x !== Q.shadow) { sun.shadow.mapSize.set(Q.shadow, Q.shadow); if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } }
+  snowGeo.setDrawRange(0, Math.min(SNOW_N, Q.snow));
+  for (const b of $('setQ').children) b.setAttribute('aria-pressed', b.dataset.q === (SETTINGS.q || 'auto'));
+}
+$('setQ').addEventListener('click', e => { const b = e.target.closest('[data-q]'); if (b) { SETTINGS.q = b.dataset.q; saveSettings(); applyQuality(); } });
 function adaptRes(raw) {
   if (S.state !== 'play' || raw > 0.25) return;
-  if (raw > 1 / 48) { slowT += raw; fastT = 0; } else { slowT = Math.max(0, slowT - raw * 0.5); if (raw < 1 / 57) fastT += raw; }
+  if (raw > 1 / 48) { slowT += raw; fastT = 0; } else { slowT = Math.max(0, slowT - raw * 0.5); stuckT = Math.max(0, stuckT - raw); if (raw < 1 / 57) fastT += raw; }
   if (slowT > 1.2 && prNow > PR_MIN) { prNow = Math.max(PR_MIN, prNow - 0.25); renderer.setPixelRatio(prNow); slowT = 0; }
   else if (fastT > 10 && prNow < PR_MAX) { prNow = Math.min(PR_MAX, prNow + 0.25); renderer.setPixelRatio(prNow); fastT = 0; }
+  if (raw > 1 / 40 && prNow <= PR_MIN) stuckT += raw;
+  if (stuckT > 8 && (SETTINGS.q || 'auto') === 'auto' && autoTier !== 'low') { autoTier = TIERS[TIERS.indexOf(autoTier) - 1]; stuckT = 0; slowT = 0; applyQuality(); }
 }
+applyQuality();
 // ---------- first-run tutorial ----------
 // A new player's first run is a fixed course down the beginner slope that teaches one move at a time, like the
 // first run of a subway runner. Each new move stops the world with the gesture drawn on screen until the player
@@ -7537,7 +7952,7 @@ function tutEnd() { TUT = null; tutHold = null; tutUI(); }
 function tutFinish() {
   const first = !save.tutDone;
   save.tutDone = true; hintDone = true;
-  if (first) { save.wallet += 100; pop('教程奖励 +100 金币'); }
+  if (first) { save.wallet += 100; Store.once(save, 'tut', { wallet: 100 }); pop('教程奖励 +100 金币'); }
   persist(); tutEnd();
   tutTip('教程完成！接下来是正式滑行，能滑多远滑多远', 4500);
 }
@@ -7558,11 +7973,13 @@ function pauseGame() {
   if (S.state !== 'play' || paused) return;
   paused = true; resumeAt = 0; $('count').hidden = true;
   $('pauseDist').textContent = Math.floor(S.d) + 'm'; $('pSfx').checked = SETTINGS.sfx; $('pMusic').checked = SETTINGS.music;
-  $('pause').hidden = false; $('pauseBtn').hidden = true; keys.l = keys.r = false; drag = null;
+  $('pause').hidden = false; $('pauseBtn').hidden = true; releaseInput();
   if (actx && actx.state === 'running') actx.suspend();
   $('resumeBtn').focus({ preventScroll: true });
 }
-function resumeGame() { $('pause').hidden = true; resumeAt = performance.now() + 2700; countShown = 0; if (actx) actx.resume(); }
+function resumeGame() { releaseInput(); $('pause').hidden = true; resumeAt = performance.now() + 2700; countShown = 0; if (actx) actx.resume(); }
+// back to the pause menu from the countdown
+function holdCount() { resumeAt = 0; $('count').hidden = true; $('pause').hidden = false; releaseInput(); if (actx && actx.state === 'running') actx.suspend(); $('resumeBtn').focus({ preventScroll: true }); }
 function leavePause() { paused = false; resumeAt = 0; $('pause').hidden = true; $('count').hidden = true; if (actx) actx.resume(); }
 $('pauseBtn').addEventListener('click', pauseGame);
 $('resumeBtn').addEventListener('click', resumeGame);
@@ -7570,8 +7987,10 @@ $('resumeBtn').addEventListener('click', resumeGame);
 $('pauseHome').addEventListener('click', () => { leavePause(); $('overEyebrow').textContent = '主动结束'; showOver(); });
 $('pauseRetry').addEventListener('click', () => { leavePause(); bank(); finishRun(); S.state = 'over'; resetWorld(); start(); });
 for (const [id, key] of [['pSfx', 'sfx'], ['pMusic', 'music']]) $(id).addEventListener('change', e => { SETTINGS[key] = e.target.checked; $(key === 'sfx' ? 'setSfx' : 'setMusic').checked = e.target.checked; saveSettings(); applySettings(); });
-document.addEventListener('visibilitychange', () => { if (document.hidden) pauseGame(); });
-addEventListener('keydown', e => { if ((e.key === 'Escape' || e.key === 'p' || e.key === 'P') && S.state === 'play') { if (!paused) pauseGame(); else if (!resumeAt) resumeGame(); } });
+// switching away (another app, another tab, a call) pauses, or stops the countdown if one was running
+function interruptGame() { releaseInput(true); if (paused && resumeAt) holdCount(); else pauseGame(); }
+document.addEventListener('visibilitychange', () => { if (document.hidden) interruptGame(); });
+addEventListener('keydown', e => { if ((e.key === 'Escape' || e.key === 'p' || e.key === 'P') && S.state === 'play') { if (!paused) pauseGame(); else if (resumeAt) holdCount(); else resumeGame(); } });
 function pauseTick(now) {
   if (!resumeAt) return;
   const left = Math.ceil((resumeAt - now) / 900), el = $('count');
@@ -7583,9 +8002,10 @@ function frame(now) {
   const raw = (now - last) / 1000, dt = Math.min(0.05, raw); last = now;
   if (paused) pauseTick(now); else if (tutHold) holdTick(); else { if (S.avaIntro > 0) S.avaIntro -= dt; if (S.bossIntro > 0) S.bossIntro -= dt; update(dt); }
   const pb = $('pauseBtn'), showPB = S.state === 'play' && !paused; if (pb.hidden === showPB) pb.hidden = !showPB;
+  lodTick();
   renderer.render(scene, camera);
   adaptRes(raw);
-  if (SETTINGS.fps) { fpsN++; if (now - fpsT > 500) { $('fps').textContent = `${Math.round(fpsN * 1000 / (now - fpsT))} fps · ${renderer.info.render.calls} dc · ×${prNow}`; fpsN = 0; fpsT = now; } }
+  if (SETTINGS.fps) { fpsN++; if (now - fpsT > 500) { $('fps').textContent = `${Math.round(fpsN * 1000 / (now - fpsT))} fps · ${renderer.info.render.calls} dc · ${Math.round(renderer.info.render.triangles / 1000)}k △ · ×${prNow}`; fpsN = 0; fpsT = now; } }
   requestAnimationFrame(frame);
 }
 resetWorld(); refreshWallets();
@@ -7639,14 +8059,13 @@ $('navBoard').addEventListener('click', () => { boardMode = save.mode in MODES ?
 const ONLINE = { url: 'https://vatsyllfwmvdjdlkruom.supabase.co', key: 'sb_publishable_173Kgkr7AoSU5tpb1DCXKg_ZGuQJbC7' };
 const onlineOn = () => !!(ONLINE.url && ONLINE.key);
 let boardScope = onlineOn() ? 'global' : 'local';
-const isoDay = () => { const t = new Date(); return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`; };
+// the server's day (Beijing), the same one the daily challenge is seeded with
+const isoDay = dailyDay;
+const dayGap = (a, b) => Math.abs(Date.parse(a) - Date.parse(b)) / 864e5;
 const boardDay = m => m === 'daily' ? isoDay() : '2000-01-01';
 const escHtml = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const cleanNick = t => String(t || '').replace(/[\u0000-\u001f\u007f<>]/g, '').trim().slice(0, 12);
-if (!save.pid) {
-  save.pid = (crypto.randomUUID && crypto.randomUUID()) || 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : r & 3 | 8).toString(16); });
-  persist();
-}
+if (!save.pid) { save.pid = Store.uuid(); persist(); }
 const SB = () => ONLINE.url.replace(/\/+$/, '');
 function timed(url, opts, ms) {
   const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), ms);
@@ -7654,8 +8073,9 @@ function timed(url, opts, ms) {
 }
 // ---------- accounts: username + password on Supabase Auth, optional; guests keep playing as before ----------
 const AUTH_KEY = 'snowcity-auth';
-let auth = null, myPub = '', cloudReady = false;
+let auth = null, myPub = '';
 try { auth = JSON.parse(localStorage.getItem(AUTH_KEY) || 'null'); } catch (e) {}
+if (!auth || !auth.uid || auth.uid !== profileUid) auth = null;
 const saveAuth = () => { try { auth ? localStorage.setItem(AUTH_KEY, JSON.stringify(auth)) : localStorage.removeItem(AUTH_KEY); } catch (e) {} };
 const playerId = () => auth ? auth.uid : save.pid;
 async function sha256hex(t) { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join(''); }
@@ -7670,19 +8090,27 @@ async function authCall(path, body, ms = 9000) {
   return j;
 }
 function takeSession(j, name) {
-  auth = { uid: j.user.id, access: j.access_token, refresh: j.refresh_token, exp: Date.now() + ((j.expires_in || 3600) - 60) * 1000,
+  auth = { uid: j.user.id, access: j.access_token, refresh: j.refresh_token, exp: Date.now() + ((j.expires_in || 3600) - 60) * 1000, expired: false,
     name: name || (j.user.user_metadata && j.user.user_metadata.name) || (auth && auth.name) || '玩家' };
   saveAuth();
 }
 let refreshing = null;
 async function token(force) {
-  if (!auth) return null;
+  if (!auth || auth.expired) return null;
   if (force || Date.now() > auth.exp) {
-    refreshing = refreshing || authCall('token?grant_type=refresh_token', { refresh_token: auth.refresh }).then(j => takeSession(j))
-      .catch(e => { if (e.status === 400 || e.status === 401) signOut(true); }).finally(() => { refreshing = null; });
+    const uid = auth.uid;
+    refreshing = refreshing || authCall('token?grant_type=refresh_token', { refresh_token: auth.refresh }).then(j => { if (auth && auth.uid === uid) takeSession(j); })
+      .catch(e => { if (e.status === 400 || e.status === 401) expireAuth(); }).finally(() => { refreshing = null; });
     await refreshing;
   }
-  return auth && auth.access;
+  return auth && !auth.expired ? auth.access : null;
+}
+// a session that can't be refreshed any more: this device stays on that account's copy (nothing is lost or mixed),
+// and syncing waits until the same player signs in again
+function expireAuth() {
+  if (!auth || auth.expired) return;
+  auth.expired = true; saveAuth();
+  toast('登录过期了，请重新登录', 'warn'); renderAcct();
 }
 async function api(path, opts = {}, ms = 6000, again) {
   const tk = await token();
@@ -7690,7 +8118,7 @@ async function api(path, opts = {}, ms = 6000, again) {
   if (tk) h.Authorization = 'Bearer ' + tk; else if (ONLINE.key.startsWith('eyJ')) h.Authorization = 'Bearer ' + ONLINE.key;
   const r = await timed(SB() + '/rest/v1/' + path, Object.assign({}, opts, { headers: h }), ms);
   if (r.status === 401 && tk && !again) { await token(true); return api(path, opts, ms, true); }
-  if (!r.ok) throw new Error('http ' + r.status);
+  if (!r.ok && !(opts.ok || []).includes(r.status)) { const e = new Error('http ' + r.status); e.status = r.status; throw e; }
   return r;
 }
 // unsent results wait here (best per mode and day), so a dropped connection loses nothing
@@ -7701,20 +8129,20 @@ function queueRow(row) {
 }
 function queueLocalBests() {
   for (const m of Object.keys(MODES)) {
-    const top = (save.board[m] || []).filter(r => m !== 'daily' || r.date === today2())[0];
-    if (top) queueRow({ mode: m, day: boardDay(m), dist: top.dist, score: top.score, skin: top.skin || save.skin });
+    const top = (save.board[m] || []).filter(r => m !== 'daily' || (r.day ? dayGap(r.day, isoDay()) <= 1 : r.date === today2()))[0];
+    if (top) queueRow({ mode: m, day: m === 'daily' ? top.day || isoDay() : boardDay(m), dist: top.dist, score: top.score, skin: top.skin || save.skin });
   }
 }
 let flushing = null;
 function flushUploads() {
-  if (!onlineOn() || !save.nick) return Promise.resolve(false);
+  if (!onlineOn() || !save.nick || (auth && auth.expired)) return Promise.resolve(false);
   if (flushing) return flushing;
   const q = save.upq || (save.upq = {});
   flushing = (async () => {
     let ok = true;
     for (const k of Object.keys(q)) {
       const r = q[k];
-      if (r.mode === 'daily' && r.day !== isoDay()) { delete q[k]; continue; }
+      if (r.mode === 'daily' && dayGap(r.day, isoDay()) > 1) { delete q[k]; continue; }
       try {
         await api('rpc/submit_score', { method: 'POST', body: JSON.stringify({ p_player: playerId(), p_name: save.nick, p_mode: r.mode, p_day: r.day, p_dist: r.dist, p_score: r.score, p_skin: r.skin }) });
         if (q[k] === r) delete q[k];
@@ -7722,8 +8150,9 @@ function flushUploads() {
       } catch (e) { ok = false; break; }
     }
     persist();
+    if (!ok) Cloud.retry();
     return ok;
-  })().finally(() => { flushing = null; });
+  })().finally(() => { flushing = null; Cloud.show(); });
   return flushing;
 }
 // how many other riders are ahead of this distance and score
@@ -7737,7 +8166,7 @@ function onlineAfterRun() {
   $('oNick').hidden = !onlineOn() || !!save.nick;
   if (!onlineOn()) return;
   const m = S.mode, dist = Math.floor(S.d), sc = score();
-  queueRow({ mode: m, day: boardDay(m), dist, score: sc, skin: save.skin });
+  queueRow({ mode: m, day: m === 'daily' ? RUN.day : boardDay(m), dist, score: sc, skin: save.skin });
   persist();
   if (!save.nick) return;
   const runId = S.runId = (S.runId || 0) + 1;
@@ -7801,86 +8230,224 @@ function renderBoard() {
     .then(rows => { c.rows = Array.isArray(rows) ? rows : []; c.err = false; }, () => { c.err = true; })
     .then(() => { c.busy = false; c.t = Date.now(); if (!$('sheetBoard').hidden && boardMode === m && boardScope === 'global') renderBoard(); });
 }
-// ---------- cloud save: one copy per account; records only ever go up when two copies meet ----------
-const CLOUD_SKIP = ['pid', 'upq', 'syncUid', 'syncT'];
-const keepLocal = () => { try { localStorage.setItem('snowcity-save', JSON.stringify(save)); } catch (e) {} };
-function cloudData() { const d = {}; for (const k in save) if (!CLOUD_SKIP.includes(k)) d[k] = save[k]; return d; }
-const better2 = (a, b) => { a = a || { dist: 0, score: 0 }; b = b || { dist: 0, score: 0 }; return a.dist > b.dist || (a.dist === b.dist && a.score >= b.score) ? a : b; };
-function maxMerge(a, b) {
-  const o = Object.assign({}, a || {}, b || {});
-  for (const k in o) {
-    const x = (a || {})[k], y = (b || {})[k];
-    if (typeof x === 'number' && typeof y === 'number') o[k] = Math.max(x, y);
-    else if (Array.isArray(x) && Array.isArray(y)) o[k] = [...new Set([...x, ...y])];
+// ---------- module: Cloud (the account's copy on the server) ----------
+// Each push only goes through if the cloud copy is still at the revision this device last saw. If another device
+// wrote in between, the push is turned away, the newer copy is pulled and merged (see Store), and the push goes
+// again. Anything that fails is retried by itself after 5 s, 15 s, 30 s, 1 min, 2 min, then every 5 min, and right
+// away when the network comes back. The board's queued results and guest claims ride along on the same retries.
+const Cloud = (() => {
+  const BACKOFF = [5, 15, 30, 60, 120, 300];
+  const st = { phase: 'idle', next: 0, n: 0 };
+  let timer = 0, running = null, again = false, pulledAt = 0, wantPull = false;
+  const signedIn = () => !!auth && !auth.expired && onlineOn();
+  const dirty = () => !!auth && (save.t || 0) > (save.syncT || 0);
+  const pending = () => dirty() || Object.keys(save.upq || {}).length > 0 || (save.claimQ || []).length > 0;
+  // key order doesn't matter when two copies are compared
+  const stable = o => JSON.stringify(o, (k, v) => v && typeof v === 'object' && !Array.isArray(v) ? Object.keys(v).sort().reduce((a, x) => (a[x] = v[x], a), {}) : v);
+  const same = (a, b) => { const x = Object.assign({}, a), y = Object.assign({}, b); for (const o of [x, y]) { delete o.t; delete o.rev; } return stable(x) === stable(y); };
+  function later(ms) { clearTimeout(timer); timer = setTimeout(run, ms); }
+  // the merged copy replaces this device's copy of the account in place (the game holds on to the save object)
+  function adopt(cloud, uid) {
+    const localFirst = save.syncUid === uid && (cloud.t || 0) <= (save.syncT || 0);
+    const skin = save.skin, mode = save.mode, out = Store.merge(save, cloud, localFirst);
+    for (const k of Object.keys(save)) delete save[k];
+    Object.assign(save, out);
+    if (!save.owned.includes(save.skin)) save.skin = 'classic';
+    if (S.state !== 'play' && S.state !== 'crash') {
+      if (save.skin !== skin) applySkin();
+      if (save.mode !== mode && !ui.menu.hidden) resetWorld();
+      refreshWallets();
+    }
   }
-  return o;
-}
-function mergeSave(c) {
-  // the cloud copy is the base unless it has not changed since this device last synced it
-  const localFirst = save.syncUid === auth.uid && (c.t || 0) <= (save.syncT || 0);
-  const newer = localFirst ? save : c, older = localFirst ? c : save;
-  const out = Object.assign({}, older, newer);
-  out.owned = [...new Set([...(older.owned || []), ...(newer.owned || [])])];
-  out.ach = Object.assign({}, older.ach || {}, newer.ach || {});
-  out.tutDone = !!(older.tutDone || newer.tutDone);
-  for (const k of ['upg', 'stats', 'mlvl']) out[k] = maxMerge(older[k], newer[k]);
-  out.best = better2(older.best, newer.best); out.bestAva = better2(older.bestAva, newer.bestAva);
-  out.bests = {}; for (const m of new Set([...Object.keys(older.bests || {}), ...Object.keys(newer.bests || {})])) out.bests[m] = better2((older.bests || {})[m], (newer.bests || {})[m]);
-  const a = older.dailyRec, b = newer.dailyRec;
-  if (a && b && a.date === b.date) out.dailyRec = Object.assign({}, better2(a, b), { done: !!(a.done || b.done) });
-  out.board = {};
-  for (const m of new Set([...Object.keys(older.board || {}), ...Object.keys(newer.board || {})])) {
-    const seen = new Set();
-    out.board[m] = [...((newer.board || {})[m] || []), ...((older.board || {})[m] || [])]
-      .filter(r => { const k = r.date + '|' + r.dist + '|' + r.score; if (seen.has(k)) return false; seen.add(k); return true; })
-      .sort((x, y) => y.dist - x.dist || y.score - x.score).slice(0, 10);
-  }
-  out.pid = save.pid; out.upq = save.upq; out.syncUid = auth.uid; out.syncT = save.syncT;
-  const skin = save.skin;
-  for (const k of Object.keys(save)) if (!(k in out)) delete save[k];
-  Object.assign(save, out);
-  if (!SKINS.some(k => k.id === save.skin) || !save.owned.includes(save.skin)) save.skin = 'classic';
-  if (save.skin !== skin && S.state !== 'play') applySkin();
-}
-let pushT = 0, syncing = null;
-async function pushCloud(keepalive) {
-  clearTimeout(pushT);
-  if (!auth || !cloudReady) return;
-  const data = cloudData();
-  try {
-    await api('saves', { method: 'POST', keepalive: !!keepalive, headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ id: auth.uid, data, updated_at: new Date().toISOString() }) });
-    save.syncT = data.t || 0; keepLocal();
-  } catch (e) {}
-}
-// pull before the first push, so a stale device never overwrites newer progress
-function syncCloud() {
-  if (!auth || !onlineOn()) return Promise.resolve(false);
-  if (syncing) return syncing;
-  syncing = (async () => {
-    const uid = auth.uid;
+  async function pull(uid) {
     const rows = await (await api(`saves?select=data&id=eq.${uid}`)).json();
-    if (!auth || auth.uid !== uid) return false;
-    if (rows[0] && rows[0].data) mergeSave(rows[0].data); else save.syncUid = uid;
-    cloudReady = true;
-    save.t = Math.max(save.t || 0, Date.now()); keepLocal();
-    await pushCloud();
-    if (S.state !== 'play') refreshWallets();
-    return true;
-  })().catch(() => false).finally(() => { syncing = null; renderAcct(); });
-  return syncing;
-}
-persist.hook = () => {
-  if (!auth || !onlineOn()) return;
-  if (!cloudReady) { syncCloud(); return; }
-  clearTimeout(pushT); pushT = setTimeout(pushCloud, 4000);
-};
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && pushT) pushCloud(true); });
-function signOut(expired) {
-  if (!expired) pushCloud(true);
-  auth = null; cloudReady = false; myPub = ''; saveAuth();
+    pulledAt = Date.now();
+    return Array.isArray(rows) && rows[0] && rows[0].data ? rows[0].data : null;
+  }
+  async function syncSave() {
+    const uid = auth.uid;
+    Store.reconcile(save);
+    let fresh = false;
+    for (let round = 0; round < 5; round++) {
+      // look at the cloud copy when this device doesn't know its revision, after a refused push, and once a minute
+      if (save.syncUid !== uid || save.rev === undefined || round > 0 || wantPull || Date.now() - pulledAt > 60e3) {
+        wantPull = false;
+        const c = await pull(uid);
+        if (!auth || auth.uid !== uid) return;
+        fresh = true;
+        if (c) adopt(c, uid);
+        save.syncUid = uid; save.rev = c ? (typeof c.rev === 'number' ? c.rev : null) : 'none';
+        if (c && same(Store.cloudCopy(save), c)) { save.syncT = save.t; save.syncOk = Date.now(); Store.write(Store.keyOf(uid), save); return; }
+      } else if (!dirty()) { save.syncOk = Date.now(); Store.write(Store.keyOf(uid), save); return; }
+      Store.reconcile(save);
+      const rev = typeof save.rev === 'number' ? save.rev + 1 : 1, data = Object.assign(Store.cloudCopy(save), { rev });
+      let ok;
+      if (save.rev === 'none') {
+        const r = await api('saves', { method: 'POST', ok: [409], headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ id: uid, data, updated_at: new Date().toISOString() }) });
+        ok = r.status !== 409;
+      } else {
+        const r = await api(`saves?id=eq.${uid}&data->>rev=${save.rev === null ? 'is.null' : 'eq.' + save.rev}`, { method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ data, updated_at: new Date().toISOString() }) });
+        const rows = await r.json().catch(() => []);
+        ok = Array.isArray(rows) && rows.length > 0;
+      }
+      if (!auth || auth.uid !== uid) return;
+      if (ok) { save.rev = rev; save.syncT = data.t; save.syncOk = Date.now(); Store.write(Store.keyOf(uid), save); return; }
+      if (fresh && round > 3) break;
+    }
+    throw new Error('conflict');
+  }
+  async function claimGuests() {
+    const q = save.claimQ || [];
+    while (q.length) { await api('rpc/claim_guest', { method: 'POST', body: JSON.stringify({ p_old: q[0] }) }); q.shift(); persistQuiet(); }
+  }
+  const uploads = () => !!save.nick && !(auth && auth.expired) && Object.keys(save.upq || {}).length > 0;
+  async function work() {
+    if (signedIn()) { await syncSave(); await claimGuests(); }
+    if (uploads() && !(await flushUploads())) throw new Error('upload');
+  }
+  // pull: look at the cloud copy even if nothing changed here (the sync button, coming back online, going home)
+  function run(pull) {
+    if (pull === true) wantPull = true;
+    clearTimeout(timer);
+    if (!onlineOn()) return Promise.resolve(false);
+    if (running) { again = true; return running; }
+    if (!signedIn() && !uploads()) { st.phase = 'idle'; show(); return Promise.resolve(false); }
+    st.phase = 'busy'; show();
+    running = work().then(() => { st.n = 0; st.phase = 'idle'; return true; }, e => {
+      const off = navigator.onLine === false || e.name === 'AbortError' || e instanceof TypeError;
+      st.phase = off ? 'offline' : 'retry';
+      const wait = BACKOFF[Math.min(st.n++, BACKOFF.length - 1)] * 1000;
+      st.next = Date.now() + wait; later(wait);
+      return false;
+    }).finally(() => {
+      running = null; show();
+      if (again) { again = false; later(300); }
+    });
+    return running;
+  }
+  // a local change: send it a few seconds later (several changes in a row go up together)
+  function changed() {
+    if (!signedIn()) return;
+    if (st.phase === 'retry' || st.phase === 'offline') { show(); return; }
+    st.phase = 'wait'; later(4000); show();
+  }
+  function retry() { if (running) return; if (st.phase !== 'retry' && st.phase !== 'offline') { st.phase = 'retry'; const wait = BACKOFF[Math.min(st.n++, BACKOFF.length - 1)] * 1000; st.next = Date.now() + wait; later(wait); } }
+  // leaving the page: one last push of what changed, without waiting for an answer
+  function leave() {
+    if (!signedIn() || !dirty() || typeof save.rev !== 'number' && save.rev !== null) return;
+    Store.reconcile(save);
+    const rev = (save.rev || 0) + 1, data = Object.assign(Store.cloudCopy(save), { rev });
+    try {
+      fetch(SB() + `/rest/v1/saves?id=eq.${auth.uid}&data->>rev=${save.rev === null ? 'is.null' : 'eq.' + save.rev}`, { method: 'PATCH', keepalive: true,
+        headers: { apikey: ONLINE.key, Authorization: 'Bearer ' + auth.access, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ data, updated_at: new Date().toISOString() }) }).catch(() => {});
+    } catch (e) {}
+    // whether that went through is checked next time (the revision is pulled again before anything else is sent)
+    save.rev = undefined; Store.write(Store.keyOf(auth.uid), save);
+  }
+  function reset() { clearTimeout(timer); st.phase = 'idle'; st.n = 0; pulledAt = 0; show(); }
+  const ago = t => {
+    const s = (Date.now() - t) / 1000;
+    if (s < 60) return '刚刚';
+    if (s < 3600) return `${Math.floor(s / 60)} 分钟前`;
+    if (s < 86400) return `${Math.floor(s / 3600)} 小时前`;
+    const d = new Date(t); return `${d.getMonth() + 1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  };
+  // [long line for the settings, short word for the home screen pill, tone]
+  function status() {
+    const q = Object.keys(save.upq || {}).length;
+    if (!auth) return [q ? `有 ${q} 条成绩等联网上传` : '登录后换手机、电脑都能接着玩', '', ''];
+    if (auth.expired) return ['登录过期了，重新登录后接着同步（进度都在这台设备上）', '需重新登录', 'warn'];
+    const last = save.syncOk ? `上次同步 ${ago(save.syncOk)}` : '还没同步过';
+    if (st.phase === 'busy') return ['正在同步…', '同步中', ''];
+    if (st.phase === 'offline') return [`没有网络，联网后自动补传 · ${last}`, '离线', 'warn'];
+    if (st.phase === 'retry') return [`同步没成功，${Math.max(1, Math.ceil((st.next - Date.now()) / 1000))} 秒后重试 · ${last}`, '同步失败', 'warn'];
+    if (pending()) return [`有新进度等待上传 · ${last}`, '待同步', ''];
+    return [save.syncOk ? `已同步 · ${ago(save.syncOk)}` : '还没同步过', save.syncOk ? '已同步' : '未同步', 'ok'];
+  }
+  function show() {
+    if (typeof renderSync === 'function') renderSync();
+  }
+  addEventListener('online', () => { st.n = 0; run(true); });
+  addEventListener('offline', () => { if (st.phase === 'wait' || st.phase === 'idle') { st.phase = pending() ? 'offline' : st.phase; show(); } });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') { if (dirty()) leave(); }
+    else if (pending() || Date.now() - pulledAt > 60e3) run(true);
+  });
+  return { run, changed, retry, reset, status, show, dirty, pending, get phase() { return st.phase; } };
+})();
+const persistQuiet = () => { Store.reconcile(save); Store.write(Store.keyOf(profileUid), save); };
+persist.hook = () => Cloud.changed();
+
+// ---------- module: Profile (whose copy of the save is in use) ----------
+// Signing in loads that account's own copy on this device (or a fresh one) and syncs it; signing out goes back to
+// the guest's copy. The guest's progress is never mixed into an account by itself: the player is asked once, and
+// can do it later from the settings. A guest copy that has been brought into an account starts over, so the same
+// coins can't be carried into a second account.
+function useProfile(uid) {
+  if (uid === profileUid) return;
+  persistQuiet();
+  profileUid = uid;
+  const next = Store.read(Store.keyOf(uid)) || Store.blank();
+  if (!next.pid) next.pid = Store.uuid();
+  for (const k of Object.keys(save)) delete save[k];
+  Object.assign(save, next);
+  persistQuiet();
+  myPub = '';
   for (const k in boardCache) boardCache[k].t = 0;
+  Cloud.reset();
+  // a finished run on screen belongs to the copy it was played on: go home instead of reviving it on another one
+  S.mDone = [];
+  if (S.state !== 'play' && S.state !== 'crash') {
+    applySkin();
+    if (!ui.over.hidden) goHome(); else { resetWorld(); refreshWallets(); }
+  }
+  achDotUpdate();
+  if (!$('sheet').hidden && !$('sheetMissions').hidden) setMisTab(misTab);
+}
+const guestCopy = () => Store.read(Store.GUEST);
+const guestWaiting = () => !!auth && !auth.expired && (g => Store.hasProgress(g) && !Store.did(save, 'guest.' + g.pid))(guestCopy());
+let guestAsked = false;
+function offerGuest() {
+  if (guestAsked || !guestWaiting()) return;
+  guestAsked = true;
+  const g = guestCopy(), far = Math.max(0, ...Object.values(g.bests).map(b => b.dist));
+  const bits = [`${Math.max(0, g.wallet)} 金币`];
+  if (far) bits.push(`最远 ${far} 米`);
+  const extra = g.owned.length - 1 + Object.values(g.upg).reduce((a, b) => a + b, 0);
+  if (extra) bits.push(`${extra} 项外观和升级`);
+  $('migNote').textContent = `这台设备上还有游客时的进度：${bits.join('，')}。`;
+  $('migName').textContent = auth.name;
+  $('migrate').hidden = false; $('migYes').focus({ preventScroll: true });
+}
+function adoptGuest() {
+  const g = guestCopy();
+  if (!auth || auth.expired || !Store.hasProgress(g)) return false;
+  Store.backup(Store.keyOf(profileUid), JSON.stringify(save), true);
+  if (!Store.absorb(save, g)) return false;
+  // its waiting results come along, and its rows on the board are moved to the account by the server
+  for (const k in g.upq || {}) queueRow(g.upq[k]);
+  if (g.pid) (save.claimQ || (save.claimQ = [])).push(g.pid);
+  const fresh = Store.blank(); fresh.pid = Store.uuid(); fresh.tutDone = g.tutDone;
+  Store.backup(Store.GUEST, JSON.stringify(g), true);
+  Store.write(Store.GUEST, Store.reconcile(fresh));
+  if (!save.owned.includes(save.skin)) save.skin = 'classic';
+  persist(); applySkin(); refreshWallets(); achDotUpdate();
+  Cloud.run();
+  return true;
+}
+$('migYes').addEventListener('click', () => { const ok = adoptGuest(); closePanel($('migrate')); toast(ok ? '游客进度已并入账号' : '没有可以并入的进度', ok ? 'boost' : ''); renderAcct(); });
+$('migNo').addEventListener('click', () => { closePanel($('migrate')); renderAcct(); });
+$('acctGuest').addEventListener('click', () => { guestAsked = false; offerGuest(); });
+
+function signOut() {
+  if (!auth) return;
+  if (Cloud.dirty() && !auth.expired) {
+    // what hasn't gone up yet stays in this account's copy on the device and goes up next time it signs in
+    toast('还有进度没传完，下次登录会接着传', 'warn');
+  }
+  auth = null; saveAuth();
+  useProfile('');
   renderAcct();
-  if (expired) toast('登录过期了，请重新登录', 'warn');
 }
 const AUTH_ERR = {
   invalid_credentials: '用户名或密码不对', user_already_exists: '这个用户名已经有人用了', email_exists: '这个用户名已经有人用了',
@@ -7891,6 +8458,7 @@ async function doAuth(act, user, pass) {
   user = cleanNick(user);
   if (!user) throw new Error('先填用户名');
   if (pass.length < 6) throw new Error('密码至少 6 位');
+  if (S.state === 'play' || S.state === 'crash') throw new Error('先滑完这一局');
   const email = await userEmail(user);
   let j;
   try {
@@ -7899,28 +8467,40 @@ async function doAuth(act, user, pass) {
     throw new Error(AUTH_ERR[e.code] || (e.name === 'AbortError' || e instanceof TypeError ? '连不上服务器，检查一下网络' : '没成功：' + e.message));
   }
   if (!j.access_token) throw new Error('注册好了，但后台还开着邮箱验证，需要先关掉');
-  const guest = save.pid;
   takeSession(j, user);
+  useProfile(auth.uid);
   if (!save.nick) save.nick = user;
   for (const k in boardCache) boardCache[k].t = 0;
-  // this device's guest scores move into the account
-  await api('rpc/claim_guest', { method: 'POST', body: JSON.stringify({ p_old: guest }) }).catch(() => {});
-  cloudReady = false;
-  await syncCloud();
-  queueLocalBests(); persist(); flushUploads();
+  persist();
+  await Cloud.run();
+  queueLocalBests(); persist(); Cloud.run();
+  setTimeout(offerGuest, 400);
 }
 function renderAcct() {
   $('acct').hidden = !onlineOn();
   $('acctName').textContent = auth ? auth.name : '游客';
-  $('acctNote').textContent = !auth ? '登录后换手机、电脑都能接着玩' : cloudReady ? '进度已同步到云端' : '还没同步上，连上网会自动同步';
-  $('acctBtn').textContent = auth ? '退出登录' : '登录 / 注册';
-  $('acctBtn').className = auth ? 'ghost sm' : 'buy';
+  $('acctBtn').textContent = !auth ? '登录 / 注册' : auth.expired ? '重新登录' : '退出登录';
+  $('acctBtn').className = auth && !auth.expired ? 'ghost sm' : 'buy';
+  $('acctGuest').hidden = !guestWaiting();
+  $('syncNow').hidden = !auth || auth.expired;
+  renderSync();
 }
+// the sync line in the settings, and a little pill on the home screen while something needs attention
+function renderSync() {
+  const [long, short, tone] = Cloud.status();
+  setText($('acctNote'), long);
+  const p = $('syncPill');
+  p.hidden = !auth || !onlineOn() || tone === 'ok';
+  setText(p, short); if (p.dataset.tone !== tone) p.dataset.tone = tone;
+}
+setInterval(() => { if (!$('sheetSet').hidden || !ui.menu.hidden) renderSync(); }, 5000);
 $('acctBtn').addEventListener('click', () => {
-  if (auth) { signOut(); return; }
+  if (auth && !auth.expired) { signOut(); return; }
   const f = $('acctForm'); f.hidden = !f.hidden; $('acctErr').textContent = '';
-  if (!f.hidden) $('acctUser').focus();
+  if (!f.hidden) { if (auth) $('acctUser').value = auth.name; (auth ? $('acctPass') : $('acctUser')).focus(); }
 });
+$('syncNow').addEventListener('click', () => { Cloud.run(true); });
+$('syncPill').addEventListener('click', () => openSheet('set'));
 $('acctForm').addEventListener('submit', async e => {
   e.preventDefault();
   const act = (e.submitter && e.submitter.dataset.act) || 'login';
@@ -7958,8 +8538,30 @@ $('wForm').addEventListener('submit', async e => {
   btns.forEach(b => b.disabled = false); renderAcct();
 });
 setTimeout(maybeWelcome, 1200);
-// anything left over from last time goes up a few seconds after the game loads, after the cloud copy is pulled
-setTimeout(() => { syncCloud().catch(() => {}).then(() => flushUploads()).catch(() => {}); }, 2500);
+// a few seconds after loading: pull the account's cloud copy, send what is waiting, and ask about a guest copy once
+setTimeout(() => { Cloud.run(true).then(() => { if (auth && ui.menu.hidden === false) offerGuest(); }); }, 2500);
+if (Store.restored) setTimeout(() => toast('存档损坏了，已从备份恢复', 'warn'), 1500);
+
+// ---------- save backups in the settings ----------
+let bakArm = 0;
+function renderBak() {
+  const list = Store.older(Store.keyOf(profileUid)), b = list[0];
+  const d = b && new Date(b.t);
+  $('bakNote').textContent = b ? `自动备份 ${list.length} 份，最近 ${d.getMonth() + 1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` : '还没有更早的备份';
+  $('bakBtn').disabled = !b; $('bakBtn').textContent = bakArm > Date.now() ? '再点一次确认' : '恢复';
+}
+$('bakBtn').addEventListener('click', () => {
+  if (bakArm < Date.now()) { bakArm = Date.now() + 4000; renderBak(); setTimeout(renderBak, 4100); return; }
+  bakArm = 0;
+  const key = Store.keyOf(profileUid), o = Store.restore(key);
+  if (!o) { renderBak(); return; }
+  // the ledger only ever counts up, so going back is booked as a change of its own (and reaches the cloud copy as one)
+  const keep = { led: save.led }; for (const k of Store.LOCAL_ONLY) if (save[k] !== undefined) keep[k] = save[k];
+  for (const k of Object.keys(save)) delete save[k];
+  Object.assign(save, o, keep);
+  persist(); applySkin(); resetWorld(); refreshWallets(); renderBak(); Cloud.run();
+  toast('已恢复到备份', 'boost');
+});
 
 
 // settings: ghost and one-hand buttons
@@ -7974,8 +8576,13 @@ function applyHand() {
 $('setHand').addEventListener('click', e => { const b = e.target.closest('[data-h]'); if (b) { SETTINGS.hand = b.dataset.h; saveSettings(); applyHand(); } });
 applyHand();
 for (const [id, k] of [['hpL', 'l'], ['hpR', 'r']]) {
-  const b = $(id), on = v => e => { e.preventDefault(); keys[k] = v; b.classList.toggle('on', v); };
-  b.addEventListener('pointerdown', on(true)); for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) b.addEventListener(ev, on(false));
+  const b = $(id), on = v => e => {
+    e.preventDefault();
+    if (v && !inputOn()) return;
+    if (v) try { b.setPointerCapture(e.pointerId); } catch (err) {}
+    keys[k] = v; b.classList.toggle('on', v);
+  };
+  b.addEventListener('pointerdown', on(true)); for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) b.addEventListener(ev, on(false));
 }
 $('hpFlip').addEventListener('pointerdown', e => { e.preventDefault(); requestFlip(); });
 $('hpSpin').addEventListener('pointerdown', e => { e.preventDefault(); requestSpin(); });
@@ -8028,7 +8635,8 @@ $('shareGo').addEventListener('click', async () => {
   toast('长按图片就能保存', 'boost');
 });
 
-if (window.__SNOW_TEST__) window.__snow = { S, update, resetWorld, halfAt, groundAt, G, onAt, commit, get JN() { return JN; }, get RP() { return RP; }, get obstacles() { return obstacles; }, get chunks() { return chunks; }, get carved() { return carved; }, get scene() { return scene; }, cx, get PATHS() { return PATHS; }, get JD() { return JD; }, get CUR() { return CUR; }, BH, camera, renderer, save, get fallen() { return fallen; }, endBoss, die, showOver, get TUT() { return TUT; }, get tutHold() { return tutHold; }, get kickers() { return kickers; }, get rails() { return rails; } };
+if (window.__SNOW_TEST__) window.__snow = { S, update, resetWorld, halfAt, groundAt, G, onAt, commit, get JN() { return JN; }, get RP() { return RP; }, get obstacles() { return obstacles; }, get chunks() { return chunks; }, get carved() { return carved; }, get scene() { return scene; }, cx, get PATHS() { return PATHS; }, get JD() { return JD; }, get CUR() { return CUR; }, BH, camera, renderer, save, get fallen() { return fallen; }, endBoss, die, showOver, get TUT() { return TUT; }, get tutHold() { return tutHold; }, get kickers() { return kickers; }, get rails() { return rails; },
+  Store, Cloud, persist, start, pauseGame, resumeGame, useProfile, adoptGuest, keys, WX, applyQuality, get Q() { return Q; }, get RUN() { return RUN; }, get auth() { return auth; }, get paused() { return paused; }, get resumeAt() { return resumeAt; }, get drag() { return drag; }, get profileUid() { return profileUid; }, get flyers() { return flyers; } };
 })();
 
 </script>
