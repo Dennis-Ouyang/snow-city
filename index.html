@@ -437,6 +437,19 @@ body.hand-left .speedo { left: auto; right: max(16px, env(safe-area-inset-right,
 .board div b small { font-size: 12px; color: var(--muted); font-weight: 600; margin-left: 6px; }
 #oNick { width: 100%; display: grid; gap: 6px; }
 #oNick p { margin: 0; font-size: 13px; }
+.linkbtn { font-family: inherit; font-size: 13px; font-weight: 700; color: #1b6a8a; background: none; border: 0; padding: 2px; cursor: pointer; text-decoration: underline; }
+.acct { margin-bottom: 10px; background: #fff; border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.acct-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; text-align: left; }
+.acct-row b { display: block; font-size: 17px; }
+.acct-row span { display: block; font-size: 12px; color: var(--muted); font-weight: 600; }
+.acct-row button.ghost.sm { font-size: 13px; padding: 6px 12px 4px; box-shadow: 0 3px 0 #c3d0d8; background: #eef3f6; }
+.acct-form { display: flex; flex-direction: column; gap: 8px; }
+.acct-form input { font-family: inherit; font-size: 16px; font-weight: 700; color: var(--ink); background: #f6f9fb; border: 2px solid #d5dee4; border-radius: 12px; padding: 8px 10px 6px; user-select: text; -webkit-user-select: text; touch-action: manipulation; }
+.acct-form input:focus { outline: none; border-color: var(--accent); }
+.acct-btns { display: grid; grid-template-columns: 1fr 1.4fr; gap: 8px; }
+.acct-btns button { font-size: 16px; padding: 9px 6px 7px; }
+.acct-err { margin: 0; min-height: 1em; font-size: 13px; font-weight: 700; color: var(--danger); }
+.acct-err:empty { display: none; }
 @media (prefers-reduced-motion: reduce) {
   #toast.show { animation-duration: .01s; animation-fill-mode: none; }
   #hurtFx.on { animation: none; }
@@ -526,6 +539,16 @@ body.hand-left .speedo { left: auto; right: max(16px, env(safe-area-inset-right,
       <button class="go" id="dailyClaim" type="button">领取</button>
     </div>
     <div id="sheetSet" hidden>
+      <div class="acct" id="acct" hidden>
+        <div class="acct-row"><div><b id="acctName">游客</b><span id="acctNote"></span></div><button type="button" class="buy" id="acctBtn">登录 / 注册</button></div>
+        <form class="acct-form" id="acctForm" hidden>
+          <input id="acctUser" maxlength="12" placeholder="用户名，最多 12 个字" autocomplete="username">
+          <input id="acctPass" type="password" placeholder="密码，至少 6 位" autocomplete="current-password">
+          <div class="acct-btns"><button class="ghost" type="submit" data-act="login">登录</button><button class="go" type="submit" data-act="signup">注册新账号</button></div>
+          <p class="acct-err" id="acctErr" role="status"></p>
+          <p class="sheet-note">不用手机号和邮箱。忘了密码没法找回，记好哦。用户名也是你在排行榜上的名字。</p>
+        </form>
+      </div>
       <div class="setlist">
         <label class="setrow"><span>音效</span><input type="checkbox" id="setSfx"><i></i></label>
         <label class="setrow"><span>背景音乐</span><input type="checkbox" id="setMusic"><i></i></label>
@@ -583,7 +606,7 @@ body.hand-left .speedo { left: auto; right: max(16px, env(safe-area-inset-right,
     </div>
     <div class="runstats" id="oStats"></div>
     <div id="oRank"></div>
-    <div id="oNick" hidden><p>取个昵称，成绩就能上全球排行榜</p><form class="nickform" id="oNickForm"><input id="oNickIn" maxlength="12" placeholder="昵称，最多 12 个字" autocomplete="off" enterkeyhint="done"><button class="buy" type="submit">上榜</button></form></div>
+    <div id="oNick" hidden><p>取个昵称，成绩就能上全球排行榜</p><form class="nickform" id="oNickForm"><input id="oNickIn" maxlength="12" placeholder="昵称，最多 12 个字" autocomplete="off" enterkeyhint="done"><button class="buy" type="submit">上榜</button></form><button type="button" class="linkbtn" id="oLogin">有账号？登录后成绩记在账号里</button></div>
     <div id="oAch"></div>
     <div class="best" id="oBreak"></div>
     <div class="missions" id="overMissions"></div>
@@ -703,7 +726,7 @@ function loadSave() {
   return d;
 }
 const save = loadSave();
-function persist() { try { localStorage.setItem('snowcity-save', JSON.stringify(save)); } catch (e) {} }
+function persist() { save.t = Date.now(); try { localStorage.setItem('snowcity-save', JSON.stringify(save)); } catch (e) {} if (persist.hook) persist.hook(); }
 const dur = { magnet: () => 8 + 3 * save.upg.magnet, double: () => 8 + 3 * save.upg.double, shield: () => 10 + 4 * save.upg.shield, hurt: () => 8 - save.upg.heal };
 
 // ---------- scenes ----------
@@ -6200,6 +6223,11 @@ $('shopBack').addEventListener('click', () => { refreshWallets(); showPanel(shop
 $('menuShop').addEventListener('click', () => openShop(ui.menu));
 // ---------- settings and the change log ----------
 const CHANGELOG = [
+  ['v17', '10月23日', [
+    '可选账号：设置里用用户名和密码注册登录，不用手机号和邮箱',
+    '登录后金币、皮肤、升级、成就和纪录自动同步到云端，手机和电脑是同一个人',
+    '登录时，这台设备以前当游客的排行榜成绩会并进账号；不登录照样能玩',
+  ]],
   ['v16', '10月23日', [
     '全球排行榜：排行页可以切「全球 / 本机」，四个模式各一个榜，每日挑战按天分开',
     '不用注册，取个昵称就能上榜；每局结束自动上传最好成绩，结算页会显示全球名次',
@@ -7395,13 +7423,51 @@ if (!save.pid) {
   save.pid = (crypto.randomUUID && crypto.randomUUID()) || 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : r & 3 | 8).toString(16); });
   persist();
 }
-function api(path, opts = {}, ms = 6000) {
+const SB = () => ONLINE.url.replace(/\/+$/, '');
+function timed(url, opts, ms) {
   const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), ms);
+  return fetch(url, Object.assign({}, opts, { signal: ctl.signal })).finally(() => clearTimeout(t));
+}
+// ---------- accounts: username + password on Supabase Auth, optional; guests keep playing as before ----------
+const AUTH_KEY = 'snowcity-auth';
+let auth = null, myPub = '', cloudReady = false;
+try { auth = JSON.parse(localStorage.getItem(AUTH_KEY) || 'null'); } catch (e) {}
+const saveAuth = () => { try { auth ? localStorage.setItem(AUTH_KEY, JSON.stringify(auth)) : localStorage.removeItem(AUTH_KEY); } catch (e) {} };
+const playerId = () => auth ? auth.uid : save.pid;
+async function sha256hex(t) { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join(''); }
+// the board shows a fingerprint of each player's id, never the id itself
+async function pubId() { const id = playerId(); if (!myPub || myPub.id !== id) myPub = { id, h: await sha256hex(id) }; return myPub.h; }
+// Supabase wants an email: a username becomes a made-up address, and the real name rides along in the account's data
+const userEmail = async u => 'p' + (await sha256hex('snowcity:' + u.toLowerCase())).slice(0, 40) + '@snowcity.game';
+async function authCall(path, body, ms = 9000) {
+  const r = await timed(SB() + '/auth/v1/' + path, { method: 'POST', headers: { apikey: ONLINE.key, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }, ms);
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) { const e = new Error(j.error_code || j.code || j.msg || ('http ' + r.status)); e.status = r.status; e.code = j.error_code || j.code || ''; throw e; }
+  return j;
+}
+function takeSession(j, name) {
+  auth = { uid: j.user.id, access: j.access_token, refresh: j.refresh_token, exp: Date.now() + ((j.expires_in || 3600) - 60) * 1000,
+    name: name || (j.user.user_metadata && j.user.user_metadata.name) || (auth && auth.name) || '玩家' };
+  saveAuth();
+}
+let refreshing = null;
+async function token(force) {
+  if (!auth) return null;
+  if (force || Date.now() > auth.exp) {
+    refreshing = refreshing || authCall('token?grant_type=refresh_token', { refresh_token: auth.refresh }).then(j => takeSession(j))
+      .catch(e => { if (e.status === 400 || e.status === 401) signOut(true); }).finally(() => { refreshing = null; });
+    await refreshing;
+  }
+  return auth && auth.access;
+}
+async function api(path, opts = {}, ms = 6000, again) {
+  const tk = await token();
   const h = Object.assign({ apikey: ONLINE.key, 'Content-Type': 'application/json' }, opts.headers || {});
-  if (ONLINE.key.startsWith('eyJ')) h.Authorization = 'Bearer ' + ONLINE.key;
-  return fetch(ONLINE.url.replace(/\/+$/, '') + '/rest/v1/' + path, Object.assign({}, opts, { headers: h, signal: ctl.signal }))
-    .then(r => { if (!r.ok) throw new Error('http ' + r.status); return r; })
-    .finally(() => clearTimeout(t));
+  if (tk) h.Authorization = 'Bearer ' + tk; else if (ONLINE.key.startsWith('eyJ')) h.Authorization = 'Bearer ' + ONLINE.key;
+  const r = await timed(SB() + '/rest/v1/' + path, Object.assign({}, opts, { headers: h }), ms);
+  if (r.status === 401 && tk && !again) { await token(true); return api(path, opts, ms, true); }
+  if (!r.ok) throw new Error('http ' + r.status);
+  return r;
 }
 // unsent results wait here (best per mode and day), so a dropped connection loses nothing
 const better = (a, b) => !b || a.dist > b.dist || (a.dist === b.dist && a.score > b.score);
@@ -7426,7 +7492,7 @@ function flushUploads() {
       const r = q[k];
       if (r.mode === 'daily' && r.day !== isoDay()) { delete q[k]; continue; }
       try {
-        await api('rpc/submit_score', { method: 'POST', body: JSON.stringify({ p_player: save.pid, p_name: save.nick, p_mode: r.mode, p_day: r.day, p_dist: r.dist, p_score: r.score, p_skin: r.skin }) });
+        await api('rpc/submit_score', { method: 'POST', body: JSON.stringify({ p_player: playerId(), p_name: save.nick, p_mode: r.mode, p_day: r.day, p_dist: r.dist, p_score: r.score, p_skin: r.skin }) });
         if (q[k] === r) delete q[k];
         for (const c in boardCache) if (c.startsWith(r.mode + '|')) boardCache[c].t = 0;
       } catch (e) { ok = false; break; }
@@ -7438,7 +7504,7 @@ function flushUploads() {
 }
 // how many other riders are ahead of this distance and score
 async function globalRank(m, dist, sc) {
-  const r = await api(`scores?select=player&mode=eq.${m}&day=eq.${boardDay(m)}&player=neq.${save.pid}&or=(dist.gt.${dist},and(dist.eq.${dist},score.gt.${sc}))&limit=1`, { headers: { Prefer: 'count=exact' } });
+  const r = await api(`scores?select=pub&mode=eq.${m}&day=eq.${boardDay(m)}&pub=neq.${await pubId()}&or=(dist.gt.${dist},and(dist.eq.${dist},score.gt.${sc}))&limit=1`, { headers: { Prefer: 'count=exact' } });
   const n = parseInt(((r.headers.get('content-range') || '').split('/')[1]), 10);
   return isNaN(n) ? 0 : n + 1;
 }
@@ -7494,12 +7560,12 @@ function renderBoard() {
   for (const b of $('boardScope').children) b.setAttribute('aria-pressed', b.dataset.s === 'global');
   $('nickBtn').textContent = save.nick ? `${save.nick} ✎` : '取个昵称';
   $('boardTabs').innerHTML = Object.keys(MODES).map(m => `<button type="button" role="tab" data-b="${m}" aria-selected="${m === boardMode}">${MODES[m].name.replace('模式', '')}</button>`).join('');
-  const m = boardMode, key = m + '|' + boardDay(m), c = boardCache[key] || {};
+  const m = boardMode, key = m + '|' + boardDay(m), c = boardCache[key] || {}, me = myPub && myPub.id === playerId() ? myPub.h : '';
   const skinName = id => (SKINS.find(k => k.id === id) || SKINS[0]).name;
   let html;
   if (c.rows && c.rows.length) {
-    const mine = c.rows.findIndex(r => r.player === save.pid);
-    html = c.rows.map((r, k) => `<div${r.player === save.pid ? ' class="me"' : ''}><i>${k + 1}</i><div><b>${escHtml(r.name)}<small>${skinName(r.skin)}</small></b><span>${r.dist} 米</span></div><span>${r.score} 分</span></div>`).join('');
+    const mine = c.rows.findIndex(r => r.pub === me);
+    html = c.rows.map((r, k) => `<div${r.pub === me ? ' class="me"' : ''}><i>${k + 1}</i><div><b>${escHtml(r.name)}<small>${skinName(r.skin)}</small></b><span>${r.dist} 米</span></div><span>${r.score} 分</span></div>`).join('');
     if (mine < 0) html += `<p>${save.nick ? '你的成绩还没进前 50，加油' : '取个昵称，你的成绩也能上榜'}</p>`;
   } else if (c.rows) html = `<p>${m === 'daily' ? '今天还没人上榜，第一个就是你' : '还没人上榜，第一个就是你'}${save.nick ? '' : '（先取个昵称）'}</p>`;
   else html = c.err ? '<p>连不上全球排行榜，过会儿再试。本机排行照常记录。</p>' : '<p>正在加载全球排行…</p>';
@@ -7507,12 +7573,146 @@ function renderBoard() {
   $('boardList').innerHTML = html;
   if (c.busy || (c.t && Date.now() - c.t < 30000)) return;
   c.busy = true; boardCache[key] = c;
-  flushUploads().then(() => api(`scores?select=player,name,dist,score,skin&mode=eq.${m}&day=eq.${boardDay(m)}&order=dist.desc,score.desc&limit=50`)).then(r => r.json())
+  pubId().catch(() => {}).then(() => flushUploads()).then(() => api(`scores?select=pub,name,dist,score,skin&mode=eq.${m}&day=eq.${boardDay(m)}&order=dist.desc,score.desc&limit=50`)).then(r => r.json())
     .then(rows => { c.rows = Array.isArray(rows) ? rows : []; c.err = false; }, () => { c.err = true; })
     .then(() => { c.busy = false; c.t = Date.now(); if (!$('sheetBoard').hidden && boardMode === m && boardScope === 'global') renderBoard(); });
 }
-// anything left over from last time goes up a few seconds after the game loads
-setTimeout(() => { flushUploads().catch(() => {}); }, 4000);
+// ---------- cloud save: one copy per account; records only ever go up when two copies meet ----------
+const CLOUD_SKIP = ['pid', 'upq', 'syncUid', 'syncT'];
+const keepLocal = () => { try { localStorage.setItem('snowcity-save', JSON.stringify(save)); } catch (e) {} };
+function cloudData() { const d = {}; for (const k in save) if (!CLOUD_SKIP.includes(k)) d[k] = save[k]; return d; }
+const better2 = (a, b) => { a = a || { dist: 0, score: 0 }; b = b || { dist: 0, score: 0 }; return a.dist > b.dist || (a.dist === b.dist && a.score >= b.score) ? a : b; };
+function maxMerge(a, b) {
+  const o = Object.assign({}, a || {}, b || {});
+  for (const k in o) {
+    const x = (a || {})[k], y = (b || {})[k];
+    if (typeof x === 'number' && typeof y === 'number') o[k] = Math.max(x, y);
+    else if (Array.isArray(x) && Array.isArray(y)) o[k] = [...new Set([...x, ...y])];
+  }
+  return o;
+}
+function mergeSave(c) {
+  // the cloud copy is the base unless it has not changed since this device last synced it
+  const localFirst = save.syncUid === auth.uid && (c.t || 0) <= (save.syncT || 0);
+  const newer = localFirst ? save : c, older = localFirst ? c : save;
+  const out = Object.assign({}, older, newer);
+  out.owned = [...new Set([...(older.owned || []), ...(newer.owned || [])])];
+  out.ach = Object.assign({}, older.ach || {}, newer.ach || {});
+  for (const k of ['upg', 'stats', 'mlvl']) out[k] = maxMerge(older[k], newer[k]);
+  out.best = better2(older.best, newer.best); out.bestAva = better2(older.bestAva, newer.bestAva);
+  out.bests = {}; for (const m of new Set([...Object.keys(older.bests || {}), ...Object.keys(newer.bests || {})])) out.bests[m] = better2((older.bests || {})[m], (newer.bests || {})[m]);
+  const a = older.dailyRec, b = newer.dailyRec;
+  if (a && b && a.date === b.date) out.dailyRec = Object.assign({}, better2(a, b), { done: !!(a.done || b.done) });
+  out.board = {};
+  for (const m of new Set([...Object.keys(older.board || {}), ...Object.keys(newer.board || {})])) {
+    const seen = new Set();
+    out.board[m] = [...((newer.board || {})[m] || []), ...((older.board || {})[m] || [])]
+      .filter(r => { const k = r.date + '|' + r.dist + '|' + r.score; if (seen.has(k)) return false; seen.add(k); return true; })
+      .sort((x, y) => y.dist - x.dist || y.score - x.score).slice(0, 10);
+  }
+  out.pid = save.pid; out.upq = save.upq; out.syncUid = auth.uid; out.syncT = save.syncT;
+  const skin = save.skin;
+  for (const k of Object.keys(save)) if (!(k in out)) delete save[k];
+  Object.assign(save, out);
+  if (!SKINS.some(k => k.id === save.skin) || !save.owned.includes(save.skin)) save.skin = 'classic';
+  if (save.skin !== skin && S.state !== 'play') applySkin();
+}
+let pushT = 0, syncing = null;
+async function pushCloud(keepalive) {
+  clearTimeout(pushT);
+  if (!auth || !cloudReady) return;
+  const data = cloudData();
+  try {
+    await api('saves', { method: 'POST', keepalive: !!keepalive, headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ id: auth.uid, data, updated_at: new Date().toISOString() }) });
+    save.syncT = data.t || 0; keepLocal();
+  } catch (e) {}
+}
+// pull before the first push, so a stale device never overwrites newer progress
+function syncCloud() {
+  if (!auth || !onlineOn()) return Promise.resolve(false);
+  if (syncing) return syncing;
+  syncing = (async () => {
+    const uid = auth.uid;
+    const rows = await (await api(`saves?select=data&id=eq.${uid}`)).json();
+    if (!auth || auth.uid !== uid) return false;
+    if (rows[0] && rows[0].data) mergeSave(rows[0].data); else save.syncUid = uid;
+    cloudReady = true;
+    save.t = Math.max(save.t || 0, Date.now()); keepLocal();
+    await pushCloud();
+    if (S.state !== 'play') refreshWallets();
+    return true;
+  })().catch(() => false).finally(() => { syncing = null; renderAcct(); });
+  return syncing;
+}
+persist.hook = () => {
+  if (!auth || !onlineOn()) return;
+  if (!cloudReady) { syncCloud(); return; }
+  clearTimeout(pushT); pushT = setTimeout(pushCloud, 4000);
+};
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && pushT) pushCloud(true); });
+function signOut(expired) {
+  if (!expired) pushCloud(true);
+  auth = null; cloudReady = false; myPub = ''; saveAuth();
+  for (const k in boardCache) boardCache[k].t = 0;
+  renderAcct();
+  if (expired) toast('登录过期了，请重新登录', 'warn');
+}
+const AUTH_ERR = {
+  invalid_credentials: '用户名或密码不对', user_already_exists: '这个用户名已经有人用了', email_exists: '这个用户名已经有人用了',
+  weak_password: '密码太简单了，至少 6 位', over_request_rate_limit: '操作太频繁，过一会儿再试', over_email_send_rate_limit: '操作太频繁，过一会儿再试',
+  signup_disabled: '暂时不能注册', email_not_confirmed: '后台还开着邮箱验证，需要先关掉', email_address_invalid: '这个用户名不能用，换一个试试',
+};
+async function doAuth(act, user, pass) {
+  user = cleanNick(user);
+  if (!user) throw new Error('先填用户名');
+  if (pass.length < 6) throw new Error('密码至少 6 位');
+  const email = await userEmail(user);
+  let j;
+  try {
+    j = act === 'signup' ? await authCall('signup', { email, password: pass, data: { name: user } }) : await authCall('token?grant_type=password', { email, password: pass });
+  } catch (e) {
+    throw new Error(AUTH_ERR[e.code] || (e.name === 'AbortError' || e instanceof TypeError ? '连不上服务器，检查一下网络' : '没成功：' + e.message));
+  }
+  if (!j.access_token) throw new Error('注册好了，但后台还开着邮箱验证，需要先关掉');
+  const guest = save.pid;
+  takeSession(j, user);
+  if (!save.nick) save.nick = user;
+  for (const k in boardCache) boardCache[k].t = 0;
+  // this device's guest scores move into the account
+  await api('rpc/claim_guest', { method: 'POST', body: JSON.stringify({ p_old: guest }) }).catch(() => {});
+  cloudReady = false;
+  await syncCloud();
+  queueLocalBests(); persist(); flushUploads();
+}
+function renderAcct() {
+  $('acct').hidden = !onlineOn();
+  $('acctName').textContent = auth ? auth.name : '游客';
+  $('acctNote').textContent = !auth ? '登录后换手机、电脑都能接着玩' : cloudReady ? '进度已同步到云端' : '还没同步上，连上网会自动同步';
+  $('acctBtn').textContent = auth ? '退出登录' : '登录 / 注册';
+  $('acctBtn').className = auth ? 'ghost sm' : 'buy';
+}
+$('acctBtn').addEventListener('click', () => {
+  if (auth) { signOut(); return; }
+  const f = $('acctForm'); f.hidden = !f.hidden; $('acctErr').textContent = '';
+  if (!f.hidden) $('acctUser').focus();
+});
+$('acctForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const act = (e.submitter && e.submitter.dataset.act) || 'login';
+  const btns = $('acctForm').querySelectorAll('button');
+  btns.forEach(b => b.disabled = true); $('acctErr').textContent = act === 'signup' ? '正在注册…' : '正在登录…';
+  try {
+    await doAuth(act, $('acctUser').value, $('acctPass').value);
+    $('acctPass').value = ''; $('acctForm').hidden = true; $('acctErr').textContent = '';
+    toast(act === 'signup' ? '注册成功' : '欢迎回来', 'boost');
+    if (!$('sheetBoard').hidden) renderBoard();
+  } catch (err) { $('acctErr').textContent = err.message; }
+  btns.forEach(b => b.disabled = false); renderAcct();
+});
+$('oLogin').addEventListener('click', () => { openSheet('set'); $('acctForm').hidden = false; $('acctUser').focus(); });
+renderAcct();
+// anything left over from last time goes up a few seconds after the game loads, after the cloud copy is pulled
+setTimeout(() => { syncCloud().catch(() => {}).then(() => flushUploads()).catch(() => {}); }, 2500);
 
 
 // settings: ghost and one-hand buttons
