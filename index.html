@@ -232,6 +232,42 @@ body {
   padding: 3px 14px 1px; border-radius: 8px; background: rgba(29, 42, 51, .55); color: #fff;
   font-size: 15px; font-weight: 800; letter-spacing: .08em; white-space: nowrap; pointer-events: none;
 }
+#tutTip {
+  position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 21%); transform: translateX(-50%);
+  max-width: min(86vw, 420px); box-sizing: border-box; padding: 8px 16px 6px; border-radius: 14px;
+  background: rgba(255, 255, 255, .92); color: var(--ink); box-shadow: 0 6px 18px rgba(29, 42, 51, .25);
+  font-size: 17px; font-weight: 800; line-height: 1.35; text-align: center; pointer-events: none; z-index: 3;
+  animation: tutIn .3s ease-out;
+}
+@keyframes tutIn { from { opacity: 0; transform: translate(-50%, -8px); } }
+#tutHold { position: fixed; inset: 0; display: grid; place-items: start center; padding: calc(env(safe-area-inset-top, 0px) + 150px) 16px 0; background: rgba(13, 24, 34, .38); pointer-events: none; z-index: 3; animation: fadeIn .2s ease-out; }
+/* at the fork the card sits low, so the lane signs over the road stay readable */
+#tutHold.low { place-items: end center; padding: 0 16px calc(env(safe-area-inset-bottom, 0px) + 20px); }
+.tut-card { display: grid; justify-items: center; gap: 4px; padding: 12px 22px 12px; border-radius: 20px; background: rgba(255, 255, 255, .94);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .3); max-width: min(84vw, 360px); box-sizing: border-box; text-align: center; }
+.tut-card b { font-size: 24px; font-weight: 800; color: var(--ink); line-height: 1.25; }
+.tut-card span { font-size: 14px; font-weight: 600; color: var(--muted); }
+.tut-card span:empty { display: none; }
+.tut-card em { font-style: normal; font-size: 12px; font-weight: 800; letter-spacing: .1em; color: var(--accent-deep); }
+.gest { position: relative; width: 120px; height: 72px; }
+.gest::before { content: ''; position: absolute; border-radius: 6px; background: rgba(255, 122, 61, .25); }
+.gest i { position: absolute; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; background: var(--accent); border: 3px solid #fff; box-shadow: 0 0 0 4px rgba(255, 122, 61, .35); }
+.gest.lr::before { left: 10px; right: 10px; top: 33px; height: 6px; }
+.gest.lr i { top: 36px; left: 60px; animation: gLR 1.6s ease-in-out infinite; }
+.gest.up::before { top: 6px; bottom: 6px; left: 57px; width: 6px; }
+.gest.up i { left: 60px; animation: gUp 1.1s ease-in infinite; }
+.gest.down::before { top: 6px; bottom: 6px; left: 57px; width: 6px; }
+.gest.down i { left: 60px; animation: gDown .9s ease-in infinite; }
+@keyframes gLR { 0%, 100% { left: 18px; } 50% { left: 102px; } }
+@keyframes gUp { 0% { top: 60px; opacity: 0; } 15% { opacity: 1; } 75% { top: 12px; opacity: 1; } 100% { top: 12px; opacity: 0; } }
+@keyframes gDown { 0% { top: 12px; opacity: 0; } 15% { opacity: 1; } 55% { top: 60px; opacity: 1; } 100% { top: 60px; opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .gest i { animation-duration: 3s; } }
+#tutSkip { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 60px); right: max(16px, env(safe-area-inset-right, 0px)); z-index: 5;
+  padding: 6px 12px 4px; border: 0; border-radius: 999px; background: rgba(29, 42, 51, .45); color: #fff; font: 800 14px var(--font-display); cursor: pointer; }
+#tutSkip:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+button.setrow { width: 100%; border: 0; border-bottom: 1px solid rgba(0,0,0,.06); background: none; font-family: inherit; color: inherit; text-align: left; }
+button.setrow b { color: var(--accent-deep); font-size: 14px; }
+.help-tut { width: 100%; margin-bottom: 12px; }
 #hint {
   position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 14%); transform: translateX(-50%);
   padding: 6px 14px 4px; border-radius: 999px; background: rgba(29, 42, 51, .55); color: #fff;
@@ -499,7 +535,10 @@ body.hand-left .speedo { left: auto; right: max(16px, env(safe-area-inset-right,
 <div id="fps" hidden></div>
 <div id="pop"></div>
 <div id="sign" hidden></div>
-<div id="hint" hidden>在空中往上滑 → 后空翻</div>
+<div id="hint" hidden>飞起来后往上滑 → 后空翻</div>
+<div id="tutTip" hidden></div>
+<div id="tutHold" hidden><div class="tut-card"><em id="tutE">新手教程</em><div class="gest" id="tutGest"><i></i></div><b id="tutT"></b><span id="tutS"></span></div></div>
+<button id="tutSkip" type="button" hidden>跳过教程 ›</button>
 
 <div class="panel home" id="menu">
   <div class="home-top">
@@ -567,11 +606,13 @@ body.hand-left .speedo { left: auto; right: max(16px, env(safe-area-inset-right,
         <label class="setrow"><span>最佳成绩幽灵</span><input type="checkbox" id="setGhost"><i></i></label>
         <div class="setrow seg"><span>单手按钮</span><div class="segbtns" id="setHand"><button type="button" data-h="off">关</button><button type="button" data-h="left">左手</button><button type="button" data-h="right">右手</button></div></div>
         <label class="setrow"><span>显示帧率</span><input type="checkbox" id="setFps"><i></i></label>
+        <button type="button" class="setrow" id="setTut"><span>新手教程</span><b>再玩一次 ›</b></button>
       </div>
       <h3 class="log-h">更新日志</h3>
       <div class="changelog" id="changelog"></div>
     </div>
     <div id="sheetHelp" hidden>
+      <button class="go help-tut" id="helpTut" type="button">进新手教程练一练</button>
       <div class="howto">
         <div><span>转向</span><b>左右拖动，或 ← →</b></div>
         <div><span>后空翻</span><b>空中往上滑，或 ↑ / 空格</b></div>
@@ -746,6 +787,8 @@ function loadSave() {
       // records used to be kept per mode in two fields; now every mode has its own entry
       out.bests = Object.assign({ normal: out.best, ava: out.bestAva }, s.bests || {});
       out.stats = s.stats || {}; out.ach = s.ach || {}; out.board = s.board || {};
+      // players from before the tutorial existed have already learned the ropes
+      if (out.tutDone === undefined) out.tutDone = (out.bests.normal && out.bests.normal.dist > 0) || (out.bests.ava && out.bests.ava.dist > 0) || false;
       if (!MODES[out.mode]) out.mode = 'normal';
       return out;
     }
@@ -1434,6 +1477,7 @@ function newPath(parent, key, d0, base, W, len, route) {
 const sceneOf = P => INDOOR[P.key] || P.key;
 // Most forks are choices between routes through the same scene; now and then one branch leads into another scene.
 function planKids(P) {
+  if (P.tutPlan) return P.tutPlan.map(q => ({ ...q }));
   // a viaduct or tunnel that runs through the fork, or a hutong, always offers the way straight on: three
   // lanes with the one that continues it in the middle, so riding straight keeps you on it
   const cont = P.viaThru || P.innerThru || P.route === 'hutong';
@@ -1665,7 +1709,10 @@ const DEEP = { gorge: [0.62, 0.78, 0.88], crevasse: [0.42, 0.6, 0.78], creek: [0
 const ACC = 1.6, V0 = 16;
 const DIFFS = { easy: { vtop: 17, dens: 2.9, want: 0.72 }, hard: { vtop: 22, dens: 3.6, want: 1 } };
 let DIFF = DIFFS.easy;
-const vmaxAt = d => 26 + DIFF.vtop * (1 - Math.exp(-Math.max(0, d) / 4000));
+// the first-run tutorial (null on a normal run); it rides at a calm, fixed top speed
+let TUT = null;
+const TUT_LEN = 700, TUT_V = 19, TUT_K1 = 212, TUT_K2 = 300;
+const vmaxAt = d => TUT ? TUT_V : 26 + DIFF.vtop * (1 - Math.exp(-Math.max(0, d) / 4000));
 const lvl = d => Math.min(6, 1 + Math.floor(Math.max(0, d) / 1000));
 // natural speed at distance d. Boosts and stumbles change it briefly, but both are undone before any launch (zones).
 const speedAt = d => Math.min(vmaxAt(d), Math.sqrt(V0 * V0 + 2 * ACC * Math.max(0, d)));
@@ -5371,8 +5418,8 @@ function genChunk0(P, s) {
       entryGate(grp, P.d0 + 154, BIOME[P.key].name, st[0], st[1]);
     }
     if (P.rt.chunk) P.rt.chunk(P, s, e, grp, i);
-    const piece = (s >= 100 && u >= 100) ? choosePiece(P, s, key) : 'plain';
-    if (piece === 'plain') plain(s, e, grp, i, key); else label = PIECES[piece](s, grp, i, baseKey(key), key) || label;
+    const piece = P.tut ? 'tut' : (s >= 100 && u >= 100) ? choosePiece(P, s, key) : 'plain';
+    if (piece === 'tut') tutChunk(s, e, grp, i); else if (piece === 'plain') plain(s, e, grp, i, key); else label = PIECES[piece](s, grp, i, baseKey(key), key) || label;
     if (P.rt.after) P.rt.after(P, s, e, grp, i);
     P.last = piece;
   }
@@ -5846,17 +5893,21 @@ function resetWorld() {
   zones = []; pads = []; pups = []; obstacles = []; coins = []; flyers = [];
   PATHS = new Map(); pathId = 0; JN = JD = null;
   DIFF = DIFFS[MODES[save.mode].diff]; DAILY_SEED = save.mode === 'daily' ? daySeed() : 0;
-  const rr = window.__SNOW_ROOT || ['city'];
-  ROOT = withGen({ rng: DAILY_SEED ? seeded(DAILY_SEED) : null }, () => newPath(null, rr[0], 0, 0, 0, 400, rr[1])); RP = GP = ROOT; setCur(ROOT);
+  const rr = TUT ? ['resort', 'blue'] : window.__SNOW_ROOT || ['city'];
+  ROOT = withGen({ rng: DAILY_SEED ? seeded(DAILY_SEED) : null }, () => newPath(null, rr[0], 0, 0, 0, TUT ? TUT_LEN : 400, rr[1])); RP = GP = ROOT; setCur(ROOT);
+  // the tutorial slope ends in a two-way fork: a terrain park full of jumps, or into the woods
+  if (TUT) { ROOT.tut = true; ROOT.tutPlan = [{ key: 'resort', route: 'park', base: -BH }, { key: 'forest', route: 'trail', base: BH }]; }
   Object.assign(S, {
     x: 0, tx: 0, xv: 0, d: 2, y: 0, vy: 0, v: V0, cv: 0, boostV: 0, slowF: 1, grounded: true, jumpAir: 0, score: 0, banked: 0, t: 0, lastTrail: 0,
     state: 'menu', crashT: 0, camY: 0, lookY: 0, lookX: 0, yaw: 0, flipA: 0, flipT: 0, spinA: 0, spinT: 0, spins: 0, flips: 0, grinds: 0, grindTotal: 0, ava: null, avaIntro: 0, maxKmh: 0, maxAir: 0, perfects: 0, avoided: 0, combo: 0, groundT: 0, shake: 0, jumps: 0,
     hurt: 0, invuln: 0, magnet: 0, double: 0, shield: 0, revives: 0, sign: '', bkey: 'city', bushSeen: false, forks: 0, forkD: 0, camX: 0, camE: 0, bestAtStart: bestOf().dist, mode: save.mode, recordShown: false,
     boss: null, bossN: 0, bossNext: 480, bossIntro: 0, bossWins: 0, rec: null, row: null, counted: false, rank: 0, ghostGap: null,
     coins: 0, pts: 0, coin2: false, dash: 0, kmh: -1,
-    near: 0, nearChain: 0, nearT: -9, feverM: 0, fevers: 0, letters: '', sets: 0, flipsN: 0, scenes: new Set(['city']), mBonus: 0, mDone: S.mDone || [], mT: 0, feverOn: false,
+    near: 0, nearChain: 0, nearT: -9, feverM: 0, fevers: 0, letters: '', sets: 0, flipsN: 0, scenes: new Set([ROOT.key]), mBonus: 0, mDone: S.mDone || [], mT: 0, feverOn: false,
   });
   clearTrail(); withGen(ROOT, resetWeather);
+  // the tutorial is always a clear morning
+  if (TUT) { WX.phase0 = 0.12; WX.goal = WX.storm = WX.kind = 0; WX.next = TUT_LEN + 500; }
   ensureChunks(true);
   S.y = G(S.d);
   player.rotation.set(0, 0, 0); rider.rotation.set(0, 0, 0); player.visible = true;
@@ -5921,6 +5972,7 @@ function commit() {
   buzz(15); S.forks++; S.forkD = J.d; S.scenes.add(P.key);
   if (drag) drag.tx0 -= P.base; // a finger held through the fork keeps steering the same spot on the new road
   toast(laneName(J.parent, P), 'boost');
+  if (TUT) { tutFinish(); return; }
   const TIPS = { forest: '绿色带红果的灌木能直接钻过去，绑红白布的树要躲开', resort: '旗门中间有金币，大跳台上往上滑翻跟头', cave: '冰面会打滑，提前转向', village: '雪人和柴火垛都是硬的，别撞', harbor: '叉车会来回开，集装箱之间有通道', lake: '冰面会打滑，冰窟窿要躲开', town: '古镇路窄，酒坛和石灯都是硬的' };
   const tk = P.rt.tip ? rkey(P) : P.key, tt = P.rt.tip || TIPS[P.key];
   if (tt && !tipsShown.has(tk)) { tipsShown.add(tk); setTimeout(() => tip(tt, 4500), 1200); }
@@ -6048,7 +6100,7 @@ const ui = {
   toast: $('toast'), pop: $('pop'), feverFx: $('feverFx'), feverBanner: $('feverBanner'), fever: $('feverBar'), letters: [...document.querySelectorAll('#letters span')], hint: $('hint'), sound: $('sound'), sign: $('sign'), hurtFx: $('hurtFx'), spNum: $('spNum'), spArc: $('spArc'), speedo: $('speedo'),
 };
 let shopReturn = null, shopTab = 'upg', hintDone = false, tipUntil = 0;
-const tipsShown = new Set(), FLIP_HINT = '在空中往上滑 → 后空翻';
+const tipsShown = new Set(), FLIP_HINT = '飞起来后往上滑 → 后空翻';
 function tip(text, ms) {
   ui.hint.textContent = text; ui.hint.hidden = false; tipUntil = performance.now() + (ms || 3500);
 }
@@ -6106,7 +6158,10 @@ function bank() {
 function start() {
   initAudio();
   retireMissions();
-  if (S.state !== 'menu') resetWorld();
+  // a new player's first run (or a replay asked for from the menu) is the tutorial course
+  const tut = tutForce || (!save.tutDone && save.mode === 'normal');
+  tutForce = false; TUT = tut ? { i: 0, on: false } : null; tutHold = null;
+  if (S.state !== 'menu' || tut || ROOT.tut) resetWorld();
   S.state = 'play'; S.mode = save.mode; S.bestAtStart = bestOf(S.mode).dist;
   // run items switched on in the menu are used up now
   const used = [];
@@ -6125,6 +6180,7 @@ function start() {
   ui.best.textContent = bestOf(S.mode).dist > 0 ? `最远 ${bestOf(S.mode).dist}m` : '';
   ghostStart();
   toast(S.dash ? '冲刺！' : '出发！', S.dash ? 'boost' : '');
+  tutUI();
 }
 // in avalanche mode nothing but the avalanche ends the run: a crash knocks the speed right down instead, and a
 // fall into a gap or into a wall puts the rider back on the snow just past it
@@ -6149,7 +6205,7 @@ function die(reason) {
   $('overEyebrow').textContent = reason;
 }
 function showOver() {
-  S.state = 'over';
+  S.state = 'over'; tutEnd();
   const dist = Math.floor(S.d), record = dist > S.bestAtStart, e = earned();
   bank(); finishRun();
   $('oDist').textContent = dist + 'm'; $('oScore').textContent = score(); $('oCoins').textContent = '+' + (e.pick + e.dist + e.task); $('oForks').textContent = S.forks;
@@ -6250,6 +6306,13 @@ $('shopBack').addEventListener('click', () => { refreshWallets(); showPanel(shop
 $('menuShop').addEventListener('click', () => openShop(ui.menu));
 // ---------- settings and the change log ----------
 const CHANGELOG = [
+  ['v19', '10月23日', [
+    '新手教程：第一次开局是一段固定的初级道，一步一步教转向、钻灌木、跳台后空翻、转体、道具、滑轨和岔路口',
+    '教到新动作时画面会停住，屏幕上画出手势，做对了才继续，不用担心字还没看完就落地',
+    '教程里撞到东西不扣血，右上角可以随时跳过；设置和玩法里都能再玩一次教程，第一次学完送 100 金币',
+    '后空翻翻了七成以上落地也算成功；新手（累计空翻不到 30 次）没翻完只会摔一下减速，不再掉血',
+    '「飞起来后往上滑 → 后空翻」的提示改成冲上跳台前就出现，一直留到落地',
+  ]],
   ['v18', '10月23日', [
     '首页的任务、排行、玩法、设置、每日奖励改成屏幕中间弹出的窗口，打开和关闭都有动画',
     '新设备第一次打开时会提示登录或注册，也可以先当游客玩',
@@ -6442,7 +6505,9 @@ addEventListener('keyup', e => {
   if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.l = false;
   if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.r = false;
 });
-renderer.domElement.addEventListener('pointerdown', e => { if (S.state === 'play') drag = { x0: e.clientX, tx0: S.tx, y0: e.clientY, yh: e.clientY, th: performance.now() }; });
+renderer.domElement.addEventListener('pointerdown', e => { if (S.state === 'play') drag = { x0: e.clientX, tx0: S.tx, y0: e.clientY, yh: e.clientY, th: performance.now(), ys: e.clientY }; });
+// while the tutorial waits for a spin, any clear down stroke counts, however slow
+addEventListener('pointermove', e => { if (tutHold && tutHold.g === 'down' && drag && e.clientY - drag.ys > 50) { drag.ys = e.clientY; requestSpin(); } });
 addEventListener('pointermove', e => {
   if (!drag) return;
   const k = (2 * BH * 1.3) / Math.min(innerWidth, 700), H = halfAt(S.d);
@@ -6470,6 +6535,8 @@ function nearMiss() {
 // the fever bar: full means a fever run (the dash: faster, unbreakable, can't fall) with double coins
 function feverAdd(f) {
   if (S.state !== 'play' || S.dash > S.d) return;
+  // the tutorial fills the bar but keeps the fever itself for the real run
+  if (TUT) { S.feverM = Math.min(0.9, S.feverM + f); return; }
   S.feverM = Math.min(1, S.feverM + f);
   if (S.feverM >= 1) {
     S.feverM = 0; S.fevers++; S.feverOn = true; buzz([30, 30, 60]);
@@ -6612,7 +6679,7 @@ const ghost = new THREE.Group(); ghost.visible = false; scene.add(ghost);
 let ghostTag = null;
 function ghostStart() {
   ghostRec = { d: [], x: [], h: [] };
-  ghostRun = SETTINGS.ghost !== false ? loadGhost(S.mode) : null;
+  ghostRun = SETTINGS.ghost !== false && !TUT ? loadGhost(S.mode) : null;
   while (ghost.children.length) ghost.remove(ghost.children[0]);
   if (!ghostRun) return;
   const r = rider.clone(); r.traverse(o => { if (o.isMesh) { o.material = ghostMat; o.castShadow = false; } }); r.rotation.set(0, 0, 0); ghost.add(r);
@@ -6645,17 +6712,27 @@ function hit(reason, o) {
   if (S.invuln > 0) { knock(o); return; }
   if (S.shield > 0) { S.shield = 0; S.invuln = 1; knock(o); toast('护盾挡住了！', 'boost'); sfx.power(); S.shake = 0.25; return; }
   if (S.mode === 'ava') { stumble(reason, o); return; }
+  // nothing hurts on the tutorial slope: a bump just slows you down
+  if (TUT) { knock(o); S.invuln = 1; S.slowF = Math.min(S.slowF, 0.6); S.shake = 0.3; S.combo = 0; sfx.bump(); buzz(30); toast('没关系，教程里撞了不扣血', 'warn'); return; }
   if (S.hurt > 0) { knock(o); die(reason); return; }
   S.hurt = dur.hurt(); S.invuln = 1.1; S.slowF = 0.55; S.shake = 0.45; S.combo = 0;
   knock(o); burst(25, 1); sfx.bump(); buzz(40);
   toast('受伤！再撞就翻车', 'warn');
 }
 function land() {
-  const air = S.jumpAir, flips = Math.floor((S.flipA + 0.7) / TAU), partial = S.flipA - flips * TAU;
+  const air = S.jumpAir;
+  let flips = Math.floor((S.flipA + 0.7) / TAU), partial = S.flipA - flips * TAU;
   const sa = Math.abs(S.spinA), spins = Math.floor((sa + 0.8) / TAU), spart = sa - spins * TAU;
   S.flipA = S.flipT = 0; S.spinA = S.spinT = 0;
   S.maxAir = Math.max(S.maxAir || 0, air);
-  if (partial > 1.0) { hit('落地没站稳'); return; }
+  if (partial > 1.0) {
+    // most of the way round counts as a (scrappy) flip; anything less is a fall, which only slows a beginner down
+    if (partial > TAU * 0.7) { flips++; partial = 0.5; }
+    else if (TUT || (save.stats.flips || 0) + S.flipsN < 30) {
+      S.slowF = Math.min(S.slowF, 0.5); S.boostV = 0; S.combo = 0; S.shake = 0.35; S.invuln = Math.max(S.invuln, 0.6);
+      sfx.bump(); buzz(30); burst(20, 0.8); toast('没翻完，摔了一下', 'warn'); pop('起跳后早点往上滑'); return;
+    } else { hit('落地没站稳'); return; }
+  }
   if (air > 0.45 || flips > 0 || spins > 0) { S.combo++; S.jumps++; }
   if (flips > 0) { S.flipsN += flips; feverAdd(0.14 * flips); }
   if (spins > 0) { S.spins = (S.spins || 0) + spins; feverAdd(0.1 * spins); }
@@ -7095,10 +7172,13 @@ function update(dt) {
       if (S.grounded) {
         S.groundT += dt;
         if (S.groundT > 2.2) S.combo = 0;
+        // the flip hint goes up on the run-up to a jump, so it has been read before the sled leaves the lip
+        const kick = !TUT && !hintDone && S.jumps < 4 && !tipping() && kickers.some(k => onAt(k, k.d0) && S.d > k.d0 - 40 && S.d < k.d0 + k.len && Math.abs(S.x - k.x) < k.w / 2 + 3);
+        if (kick) { ui.hint.textContent = FLIP_HINT; ui.hint.hidden = false; S.hintK = S.d; }
       } else {
         S.groundT = 0; S.jumpAir += dt;
         if (S.jumpAir > 0.12) S.pts += dt * 20 * Math.max(1, S.combo) * (S.double > 0 ? 2 : 1);
-        if (S.jumpAir > 0.3 && !hintDone && S.jumps < 4 && !tipping()) { ui.hint.textContent = FLIP_HINT; ui.hint.hidden = false; }
+        if (!TUT && !hintDone && S.jumps < 4 && !tipping()) { ui.hint.textContent = FLIP_HINT; ui.hint.hidden = false; }
         S.flipA = Math.min(S.flipT, S.flipA + dt * 9.5);
       }
       for (const o of obstacles) {
@@ -7192,6 +7272,7 @@ function update(dt) {
       const sign = ch ? ch.label : '';
       if (sign !== S.sign) { S.sign = sign; ui.sign.textContent = sign; ui.sign.hidden = !sign; }
       if (!S.recordShown && S.bestAtStart > 200 && S.d > S.bestAtStart) { S.recordShown = true; toast('打破纪录！', 'boost'); }
+      if (TUT) tutTick();
       ensureChunks();
     }
   } else if (S.state === 'crash') {
@@ -7333,7 +7414,7 @@ function update(dt) {
       ui.speedo.style.setProperty('--sp', `hsl(${Math.round(190 - f * 190)} 85% 60%)`);
     }
     setText(ui.dist, Math.floor(S.d) + 'm');
-    if (!tipping() && (S.grounded || S.state !== 'play')) ui.hint.hidden = true;
+    if (!tipping() && ((S.grounded && !(S.d - (S.hintK || -99) < 2)) || S.state !== 'play')) ui.hint.hidden = true;
     const chips = [];
     if (S.combo >= 2) chips.push(['combo', `连击 ×${S.combo}`]);
     if (S.hurt > 0) chips.push(['hurt', `受伤 ${Math.ceil(S.hurt)}`]);
@@ -7365,6 +7446,111 @@ function adaptRes(raw) {
   if (slowT > 1.2 && prNow > PR_MIN) { prNow = Math.max(PR_MIN, prNow - 0.25); renderer.setPixelRatio(prNow); slowT = 0; }
   else if (fastT > 10 && prNow < PR_MAX) { prNow = Math.min(PR_MAX, prNow + 0.25); renderer.setPixelRatio(prNow); fastT = 0; }
 }
+// ---------- first-run tutorial ----------
+// A new player's first run is a fixed course down the beginner slope that teaches one move at a time, like the
+// first run of a subway runner. Each new move stops the world with the gesture drawn on screen until the player
+// does it; between moves a short line at the top says what is coming, and stays until it has been passed.
+let tutForce = false, tutHold = null;
+const coarse = matchMedia('(pointer: coarse)').matches;
+// what to say besides the gesture: the keys on a computer, the buttons in one-hand mode
+const altKey = (key, pad) => SETTINGS.hand && SETTINGS.hand !== 'off' ? pad : coarse ? '' : key;
+const tutAir = () => !S.grounded && !S.grind && S.y - groundAt(S.x, S.d) > 0.8;
+const TUT_STEPS = [
+  { go: () => S.d > 3, tip: '新手教程：跟着提示学操作', end: () => S.d > 40 },
+  { go: () => S.d > 44, hold: { g: 'lr', t: '按住屏幕，左右拖动', s: () => altKey('键盘 ← → 也可以', '或者按 ◀ ▶'), ok: h => keys.l || keys.r || Math.abs(S.tx - h.tx) > 0.9 },
+    tip: '往旁边拐，绕开造雪机', end: () => S.d > 98 },
+  { go: () => S.d > 102, tip: '跟着金币走，一般就撞不上', end: () => S.d > 156 },
+  { go: () => S.d > 158, tip: '绿色的灌木丛可以直接钻过去', end: () => S.d > 192 },
+  { go: () => S.d > 194, tip: '冲上前面的跳台，会自己飞起来', end: () => (S.d > TUT_K1 + 12 && !S.grounded) || S.d > TUT_K1 + 50 },
+  { go: tutAir, skip: () => S.grounded && S.d > TUT_K1 + 50, hold: { g: 'up', t: '往上滑 → 后空翻', s: () => altKey('键盘 ↑ 或空格', '或者按「翻」'), ok: () => S.flipT > 0 },
+    tip: '落地前翻完一圈就算成功', end: () => S.grounded },
+  { go: () => S.d > TUT_K2 - 40, tip: '再来一个跳台', end: () => (S.d > TUT_K2 + 12 && !S.grounded) || S.d > TUT_K2 + 50 },
+  { go: tutAir, skip: () => S.grounded && S.d > TUT_K2 + 50, hold: { g: 'down', t: '往下快速一划 → 转体', s: () => altKey('键盘 ↓', '或者按「转」'), ok: () => S.spinT !== 0 },
+    tip: '空中翻跟头和转体可以一起做，分更高', end: () => S.grounded },
+  { go: () => S.d > 352, tip: '吃到道具有奇效：磁铁会把金币吸过来', end: () => S.d > 440 },
+  { go: () => S.d > 442, tip: '护盾能帮你挡下一次碰撞', end: () => S.d > 500 },
+  { go: () => S.d > 502, tip: '平时撞一下会受伤，伤好之前再撞就翻车', end: () => S.d > 522 },
+  { go: () => S.d > 523, tip: '吃到爱心马上回血', end: () => S.d > 542 },
+  { go: () => S.d > 544, tip: '对准中间的滑轨，贴上去就能滑', end: () => S.d > 598 },
+  { go: () => S.d > 652, hold: { g: 'lr', e: '岔路口', low: true, t: '往哪边拖，就走哪条路', s: () => altKey('键盘 ← →', '或者按 ◀ ▶'), ok: h => keys.l || keys.r || Math.abs(S.tx - h.tx) > 1.4 },
+    tip: '过路口时在哪条道，就走哪条路', end: () => false },
+];
+// the course itself, chunk by chunk (the last chunk is the fork's own run-up)
+function tutChunk(s, e, grp, i) {
+  const has = d => d >= s && d < e;
+  if (has(75)) { for (const x of [-1.4, 1.4]) placeObstacle(grp, TY.cannon, x, 75, G(75), i); coinRun(grp, -4.6, 56, 98, 2.4, i); coinRun(grp, 4.6, 56, 98, 2.4, i); }
+  if (has(122)) {
+    placeObstacle(grp, TY.rock, 3.5, 122, G(122), i); placeObstacle(grp, TY.rock, -3.5, 142, G(142), i);
+    coinRun(grp, lanePath([[104, 0], [114, -3.5], [127, -3.5], [137, 3.5], [148, 3.5], [156, 0]]), 104, 156, 2.4, i);
+  }
+  if (has(175)) for (const x of [-4.8, -1.6, 1.6, 4.8]) addBush(grp, x, 175, 1.4, i, true);
+  for (const d0 of [TUT_K1, TUT_K2]) if (has(d0)) {
+    const w = 2 * halfAt(d0) - 0.4, k = addKicker(grp, d0, 0, w, 3.6, 12, 'snow');
+    arcCoins(grp, kickerPath(k), 0, i, 9, 0.85);
+    for (const sx of [-1, 1]) { const p = mesh(GEO.flagPole, M.pole, sx * (w / 2 + 0.6), G(d0 + 12) + 4.6, -(d0 + 12)); p.scale.y = 2; grp.add(p); grp.add(mesh(GEO.flag, sx < 0 ? M.sign : M.orange, sx * (w / 2 + 0.6), G(d0 + 12) + 6.1, -(d0 + 12) + 0.3)); }
+    coinRun(grp, 0, d0 - 20, d0 - 2, 2.4, i);
+  }
+  const pup = (type, x, d) => { const sp = new THREE.Sprite(PUP[type]); sp.scale.setScalar(1.5); const y = groundAt(x, d) + 1.3; sp.position.set(x, y, -d); grp.add(sp); pups.push({ x, d, y, type, sp, taken: false, chunk: i }); };
+  if (has(372)) {
+    for (const x of [-4.6, 0, 4.6]) pup('magnet', x, 372);
+    for (let d = 386; d < 432; d += 5) for (const x of [-5.5, -2.75, 0, 2.75, 5.5]) addCoin(grp, x, d, groundAt(x, d) + 0.8, i);
+  }
+  if (has(458)) { for (const x of [-4.6, 0, 4.6]) pup('shield', x, 458); for (const x of [-4.8, 0, 4.8]) placeObstacle(grp, TY.cannon, x, 488, G(488), i); }
+  if (has(532)) pup('heart', 0, 532);
+  if (has(560)) { coinRun(grp, 0, 546, 556, 2.4, i); addRail(grp, 0, 556, 594, 0.9, 'box'); coinRun(grp, 0, 561, 593, 2.4, i, 1.55); }
+}
+let tutTipT = 0;
+function tutTip(text, ms) {
+  const el = $('tutTip');
+  if (!text) { el.hidden = true; return; }
+  if (el.textContent !== text || el.hidden) { el.textContent = text; el.hidden = false; el.style.animation = 'none'; void el.offsetWidth; el.style.animation = ''; }
+  clearTimeout(tutTipT); if (ms) tutTipT = setTimeout(() => { el.hidden = true; }, ms);
+}
+function tutUI() { $('tutSkip').hidden = !TUT; if (!TUT) { $('tutHold').hidden = true; tutTip(''); } }
+function tutTick() {
+  const st = TUT_STEPS[TUT.i];
+  if (!st || tutHold) return;
+  if (!TUT.on) {
+    if (st.skip && st.skip()) { TUT.i++; return; }
+    if (!st.go()) return;
+    TUT.on = true;
+    if (st.hold) {
+      // the world stops here until the move is done
+      tutHold = { ...st.hold, tx: S.tx };
+      const g = $('tutGest'); g.className = 'gest ' + st.hold.g;
+      $('tutE').textContent = st.hold.e || '新手教程'; $('tutHold').classList.toggle('low', !!st.hold.low); $('tutT').textContent = st.hold.t; $('tutS').textContent = st.hold.s(); $('tutHold').hidden = false; tutTip('');
+      keys.l = keys.r = false; buzz(15);
+      return;
+    }
+    tutTip(st.tip);
+  }
+  if (st.end()) { TUT.on = false; TUT.i++; tutTip(''); }
+}
+function holdTick() {
+  if (S.state !== 'play' || !TUT) { tutHold = null; $('tutHold').hidden = true; return; }
+  if (!tutHold.ok(tutHold)) return;
+  const st = TUT_STEPS[TUT.i];
+  tutHold = null; $('tutHold').hidden = true; sfx.power();
+  if (st.tip) tutTip(st.tip);
+}
+function tutEnd() { TUT = null; tutHold = null; tutUI(); }
+function tutFinish() {
+  const first = !save.tutDone;
+  save.tutDone = true; hintDone = true;
+  if (first) { save.wallet += 100; pop('教程奖励 +100 金币'); }
+  persist(); tutEnd();
+  tutTip('教程完成！接下来是正式滑行，能滑多远滑多远', 4500);
+}
+// skipping goes straight into a normal run
+$('tutSkip').addEventListener('click', () => {
+  if (!TUT || S.state !== 'play') return;
+  save.tutDone = true; persist(); tutEnd(); bank();
+  S.state = 'over'; resetWorld(); start();
+});
+function replayTut() { save.mode = 'normal'; persist(); tutForce = true; refreshWallets(); start(); }
+$('setTut').addEventListener('click', replayTut);
+$('helpTut').addEventListener('click', replayTut);
+
 // ---------- pause ----------
 // the world stands still while paused; coming back counts 3-2-1 before the sled moves again
 let paused = false, resumeAt = 0, countShown = 0;
@@ -7395,7 +7581,7 @@ function pauseTick(now) {
 function frame(now) {
   if (window.__HOLD) { last = now; requestAnimationFrame(frame); return; }
   const raw = (now - last) / 1000, dt = Math.min(0.05, raw); last = now;
-  if (paused) pauseTick(now); else { if (S.avaIntro > 0) S.avaIntro -= dt; if (S.bossIntro > 0) S.bossIntro -= dt; update(dt); }
+  if (paused) pauseTick(now); else if (tutHold) holdTick(); else { if (S.avaIntro > 0) S.avaIntro -= dt; if (S.bossIntro > 0) S.bossIntro -= dt; update(dt); }
   const pb = $('pauseBtn'), showPB = S.state === 'play' && !paused; if (pb.hidden === showPB) pb.hidden = !showPB;
   renderer.render(scene, camera);
   adaptRes(raw);
@@ -7636,6 +7822,7 @@ function mergeSave(c) {
   const out = Object.assign({}, older, newer);
   out.owned = [...new Set([...(older.owned || []), ...(newer.owned || [])])];
   out.ach = Object.assign({}, older.ach || {}, newer.ach || {});
+  out.tutDone = !!(older.tutDone || newer.tutDone);
   for (const k of ['upg', 'stats', 'mlvl']) out[k] = maxMerge(older[k], newer[k]);
   out.best = better2(older.best, newer.best); out.bestAva = better2(older.bestAva, newer.bestAva);
   out.bests = {}; for (const m of new Set([...Object.keys(older.bests || {}), ...Object.keys(newer.bests || {})])) out.bests[m] = better2((older.bests || {})[m], (newer.bests || {})[m]);
@@ -7841,7 +8028,7 @@ $('shareGo').addEventListener('click', async () => {
   toast('长按图片就能保存', 'boost');
 });
 
-if (window.__SNOW_TEST__) window.__snow = { S, update, resetWorld, halfAt, groundAt, G, onAt, commit, get JN() { return JN; }, get RP() { return RP; }, get obstacles() { return obstacles; }, get chunks() { return chunks; }, get carved() { return carved; }, get scene() { return scene; }, cx, get PATHS() { return PATHS; }, get JD() { return JD; }, get CUR() { return CUR; }, BH, camera, renderer, save, get fallen() { return fallen; }, endBoss, die, showOver };
+if (window.__SNOW_TEST__) window.__snow = { S, update, resetWorld, halfAt, groundAt, G, onAt, commit, get JN() { return JN; }, get RP() { return RP; }, get obstacles() { return obstacles; }, get chunks() { return chunks; }, get carved() { return carved; }, get scene() { return scene; }, cx, get PATHS() { return PATHS; }, get JD() { return JD; }, get CUR() { return CUR; }, BH, camera, renderer, save, get fallen() { return fallen; }, endBoss, die, showOver, get TUT() { return TUT; }, get tutHold() { return tutHold; }, get kickers() { return kickers; }, get rails() { return rails; } };
 })();
 
 </script>
